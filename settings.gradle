@@ -1,6 +1,5 @@
 rootProject.name = 'financial-trading-ai-agentic-showcase'
 //include ':components:employee-domain'
 include ':components:trading-domain'
-//include ':components:server:demo-functions'
-//include ':applications:demo-app'
+include ':applications:research-trader-agent-processor'
 include ':applications:sentiment-news-agent-processor'
