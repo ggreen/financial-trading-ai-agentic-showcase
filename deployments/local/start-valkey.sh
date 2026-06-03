@@ -1,0 +1,1 @@
+podman run --rm --name valkey -it -p 6379:6379 docker.io/valkey/valkey:latest
