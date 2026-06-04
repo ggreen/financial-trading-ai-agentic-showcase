@@ -1,8 +1,9 @@
 package io.cloudNativeData.sentiment.agent.ai;
 
-import io.cloudNativeData.trading.StockNewsAnalysis;
+import io.cloudNativeData.trading.StockPrediction;
+import io.cloudNativeData.trading.news.NewsParameters;
 
 @FunctionalInterface
 public interface StockAnalysisInference {
-    StockNewsAnalysis infer(String rawNews);
+    StockPrediction infer(NewsParameters rawNews);
 }

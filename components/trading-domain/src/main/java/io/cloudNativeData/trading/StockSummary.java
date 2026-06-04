@@ -1,5 +1,6 @@
 package io.cloudNativeData.trading;
 
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

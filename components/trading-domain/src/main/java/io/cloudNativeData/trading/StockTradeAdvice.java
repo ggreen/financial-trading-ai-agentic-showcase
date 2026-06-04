@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StockTradeAdvice {
     private String id;
-    private AdviceAction adviceAction;
+    private TradePrediction adviceAction;
     private double price;
     private int quantity;
 }

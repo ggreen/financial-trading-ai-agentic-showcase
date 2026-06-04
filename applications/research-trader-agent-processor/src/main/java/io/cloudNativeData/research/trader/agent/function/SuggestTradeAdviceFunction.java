@@ -1,8 +1,7 @@
 package io.cloudNativeData.research.trader.agent.function;
 
-import io.cloudNativeData.research.trader.agent.ai.TradeSuggestionInference;
 import io.cloudNativeData.research.trader.agent.service.TradeAdviceService;
-import io.cloudNativeData.trading.StockNewsAnalysis;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.StockTradeAdvice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

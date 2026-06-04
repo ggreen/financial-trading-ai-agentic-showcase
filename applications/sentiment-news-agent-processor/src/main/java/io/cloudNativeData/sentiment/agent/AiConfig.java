@@ -1,13 +1,11 @@
 package io.cloudNativeData.sentiment.agent;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
-import io.cloudNativeData.trading.StockNewsAnalysis;
+import io.cloudNativeData.trading.StockPrediction;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -39,7 +37,7 @@ public class AiConfig {
             var results = chatClient.prompt(prompt)
                     .advisors(advisor)
                     .call()
-                    .entity(StockNewsAnalysis.class);
+                    .entity(StockPrediction.class);
 
             log.info("AI results: {}", results);
             return results;

@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * : 'ticker',
  * 'sentiment' (BULLISH/BEARISH/NEUTRAL),
  * and 'confidence' (0.0-1.0)."
  */
@@ -14,9 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockNewsAnalysis {
-    private String id; //stockId
+public class StockPrediction {
     private MarketSentiment marketSentiment;
     private double confidence;
-    private String rawNews;
 }

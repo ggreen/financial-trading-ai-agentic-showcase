@@ -2,7 +2,7 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradeSuggestionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockRepository;
-import io.cloudNativeData.trading.StockNewsAnalysis;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.StockSummary;
 import io.cloudNativeData.trading.StockTradeAdvice;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package io.cloudNativeData.research.trader.agent.function;
 
 import io.cloudNativeData.research.trader.agent.service.TradeAdviceService;
-import io.cloudNativeData.trading.StockNewsAnalysis;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.StockTradeAdvice;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;

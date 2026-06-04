@@ -1,7 +1,6 @@
 package io.cloudNativeData.trading;
 
-public enum AdviceAction {
-
+public enum TradePrediction {
     NA,
     BUY,
     SELL
