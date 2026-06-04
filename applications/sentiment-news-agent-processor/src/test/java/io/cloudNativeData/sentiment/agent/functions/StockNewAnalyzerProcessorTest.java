@@ -1,6 +1,7 @@
 package io.cloudNativeData.sentiment.agent.functions;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
+import io.cloudNativeData.sentiment.agent.functions.processor.StockNewAnalyzerProcessor;
 import io.cloudNativeData.trading.StockPrediction;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;

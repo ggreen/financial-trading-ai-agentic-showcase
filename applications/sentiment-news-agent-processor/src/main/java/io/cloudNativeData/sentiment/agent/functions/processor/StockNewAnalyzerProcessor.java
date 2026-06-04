@@ -1,12 +1,10 @@
-package io.cloudNativeData.sentiment.agent.functions;
+package io.cloudNativeData.sentiment.agent.functions.processor;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.function.Function;
 
