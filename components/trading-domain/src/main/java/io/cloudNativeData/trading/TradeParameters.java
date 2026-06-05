@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockSummary {
+public class TradeParameters {
 
-    private StockNewsAnalysis news;
+    private StockPrediction prediction;
     private BigDecimal movingAverage200;
 }

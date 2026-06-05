@@ -1,6 +1,5 @@
 package io.cloudNativeData.sentiment.agent;
 
-import io.cloudNativeData.trading.StockTradeAdvice;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

@@ -1,10 +1,10 @@
 package io.cloudNativeData.research.trader.agent.service;
 
-import io.cloudNativeData.research.trader.agent.ai.TradeSuggestionInference;
-import io.cloudNativeData.research.trader.agent.repository.StockRepository;
+import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
+import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
-import io.cloudNativeData.trading.StockSummary;
-import io.cloudNativeData.trading.StockTradeAdvice;
+import io.cloudNativeData.trading.TradeParameters;
+import io.cloudNativeData.trading.TradeAdvice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,20 +14,24 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TradeAdviceService {
 
-    private final TradeSuggestionInference inference;
-    private final StockRepository repository;
+    private final TradePredictionInference inference;
+    private final StockPricingExecution repository;
 
-    public StockTradeAdvice recommend(StockNewsAnalysis stockNewsAnalysis) {
+    public TradeAdvice recommend(StockNewsAnalysis stockNewsAnalysis) {
 
         var movingAverage200 = repository.calculateMovingAverage200(stockNewsAnalysis.getId());
-        var summary200 = StockSummary.builder()
-                .news(stockNewsAnalysis)
+        var summary200 = TradeParameters.builder()
+                .prediction(stockNewsAnalysis.getPrediction())
                 .movingAverage200(movingAverage200)
                 .build();
 
-        var advice = inference.recommend(summary200);
+        var tradePrediction = inference.recommend(summary200);
 
-        log.info("advice: {}", advice);
-        return advice;
+        log.info("predication: {}", tradePrediction);
+        return TradeAdvice
+                .builder()
+                .id(stockNewsAnalysis.getId())
+                .tradePrediction(tradePrediction)
+                .build();
     }
 }

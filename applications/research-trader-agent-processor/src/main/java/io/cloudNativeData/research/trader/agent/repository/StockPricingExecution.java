@@ -1,10 +1,10 @@
 package io.cloudNativeData.research.trader.agent.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.gemfire.function.annotation.OnRegion;
 
 import java.math.BigDecimal;
 
-@Repository
-public interface StockRepository {
+@OnRegion(region="StockDailyPrice")
+public interface StockPricingExecution {
     BigDecimal calculateMovingAverage200(String stockId);
 }

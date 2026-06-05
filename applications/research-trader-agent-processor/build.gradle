@@ -13,6 +13,10 @@ java {
 	}
 }
 
+tasks.named('bootJar') {
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 repositories {
 	mavenCentral()
 }
@@ -20,10 +24,13 @@ repositories {
 ext {
 	set('springAiVersion', "2.0.0-M8")
 	set('springCloudVersion', "2025.1.1")
+	springBootForGemFireVersion = '2.0.0'
+	vmwareGemFireVersion = '10.2.0'
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.ai:spring-ai-starter-vector-store-gemfire'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.github.nyla-solutions:nyla.solutions.core:2.5.1'
 	implementation 'org.springframework.ai:spring-ai-tika-document-reader'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
@@ -31,10 +38,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
-	implementation 'org.springframework.ai:spring-ai-starter-vector-store-redis'
 	implementation 'org.springframework.amqp:spring-rabbit-stream'
 	implementation 'org.springframework.cloud:spring-cloud-stream'
 	implementation 'org.springframework.cloud:spring-cloud-stream-binder-rabbit'
+	implementation "com.vmware.gemfire:spring-boot-4.0-gemfire-10.2:$springBootForGemFireVersion"
+	implementation "com.vmware.gemfire:gemfire-core:$vmwareGemFireVersion"
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-amqp-test'
@@ -68,4 +77,18 @@ dependencyManagement {
 repositories {
 	mavenCentral()
 	mavenLocal()
+	maven {
+		url "https://packages.broadcom.com/artifactory/gemfire/"
+		metadataSources {
+			mavenPom()
+			artifact()
+			ignoreGradleMetadataRedirection()
+		}
+		credentials {
+			credentials {
+				username System.getenv('BROADCOM_MAVEN_USERNAME')
+				password System.getenv('BROADCOM_GEMFIRE_MAVEN_PASSWORD')
+			}
+		}
+	}
 }

@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockTradeAdvice {
+public class TradeAdvice {
     private String id;
-    private TradePrediction adviceAction;
-    private double price;
-    private int quantity;
+    private TradePrediction tradePrediction;
+
 }

@@ -2,7 +2,7 @@ package io.cloudNativeData.research.trader.agent.function;
 
 import io.cloudNativeData.research.trader.agent.service.TradeAdviceService;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
-import io.cloudNativeData.trading.StockTradeAdvice;
+import io.cloudNativeData.trading.TradeAdvice;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class SuggestTradeAdviceFunctionTest {
 
     @Test
     void apply() {
-        var expected = StockTradeAdvice.builder().build();
+        var expected = TradeAdvice.builder().build();
         when(service.recommend(any(StockNewsAnalysis.class))).thenReturn(expected);
 
         var actual = subject.apply(news);

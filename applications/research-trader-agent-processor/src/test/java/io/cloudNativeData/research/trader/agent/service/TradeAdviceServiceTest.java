@@ -1,9 +1,10 @@
 package io.cloudNativeData.research.trader.agent.service;
 
-import io.cloudNativeData.research.trader.agent.ai.TradeSuggestionInference;
-import io.cloudNativeData.research.trader.agent.repository.StockRepository;
+import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
+import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
+import io.cloudNativeData.trading.TradeAdvice;
+import io.cloudNativeData.trading.TradePrediction;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
-import io.cloudNativeData.trading.StockTradeAdvice;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,10 @@ class TradeAdviceServiceTest {
     private TradeAdviceService subject;
     private final StockNewsAnalysis news = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
     @Mock
-    private StockRepository repository;
+    private StockPricingExecution repository;
     @Mock
-    private TradeSuggestionInference inference;
+    private TradePredictionInference inference;
+    private final TradePrediction prediction = JavaBeanGeneratorCreator.of(TradePrediction.class).create();
 
     @BeforeEach
     void setUp() {
@@ -35,17 +37,16 @@ class TradeAdviceServiceTest {
     @Test
     void given_news_when_recommendation_then_advice_with_200_day_moving_avg() {
 
-        var expected = JavaBeanGeneratorCreator.of(StockTradeAdvice.class).create();
+        var expected = TradeAdvice.builder().tradePrediction(prediction)
+                .id(news.getId()).build();
 
-
-        when(inference.recommend(any())).thenReturn(expected);
+        when(inference.recommend(any())).thenReturn(prediction);
 
         var actual = subject.recommend(news);
 
         verify(repository).calculateMovingAverage200(anyString());
 
         assertThat(actual).isEqualTo(expected);
-
 
     }
 }

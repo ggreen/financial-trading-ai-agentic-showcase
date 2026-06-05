@@ -1,7 +1,16 @@
 package io.cloudNativeData.trading;
 
-public enum TradePrediction {
-    NA,
-    BUY,
-    SELL
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class TradePrediction {
+    private TradeAction adviceAction;
+    private double price;
+    private int quantity;
 }
