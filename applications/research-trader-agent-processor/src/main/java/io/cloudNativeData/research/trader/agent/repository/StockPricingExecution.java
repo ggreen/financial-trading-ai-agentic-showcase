@@ -6,5 +6,5 @@ import java.math.BigDecimal;
 
 @OnRegion(region="StockDailyPrice")
 public interface StockPricingExecution {
-    BigDecimal calculateMovingAverage200(String stockId);
+    BigDecimal calculateMovingAverage200(String[] stockId);
 }

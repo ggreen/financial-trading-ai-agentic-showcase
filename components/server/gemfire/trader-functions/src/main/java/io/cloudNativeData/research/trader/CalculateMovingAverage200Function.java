@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class CalculateMovingAverage200Function implements Function<String[]> {
+public class CalculateMovingAverage200Function implements Function<Object[]> {
 
     private static final int MOVING_AVERAGE_PERIOD = 200;
 
@@ -30,7 +30,7 @@ public class CalculateMovingAverage200Function implements Function<String[]> {
     }
 
     @Override
-    public void execute(FunctionContext<String[]> functionContext) {
+    public void execute(FunctionContext<Object[]> functionContext) {
 
 
         // Ensure the function is executed on a Region
@@ -38,7 +38,7 @@ public class CalculateMovingAverage200Function implements Function<String[]> {
             throw new FunctionException("Only region functions are supported");
         }
 
-        RegionFunctionContext<String[]> rfc = (RegionFunctionContext) functionContext;
+        RegionFunctionContext<Object[]> rfc = (RegionFunctionContext) functionContext;
         Region<String, StockDailyPrice> region = toLocalRegion.convert(rfc.getDataSet());
 
         // Expecting the ticker string passed as an argument
@@ -47,7 +47,7 @@ public class CalculateMovingAverage200Function implements Function<String[]> {
             throw new FunctionException("Target ticker is null or empty");
         }
 
-        String targetTicker = rfc.getArguments()[0];
+        String targetTicker = String.valueOf(rfc.getArguments()[0]);
 
 
         // Stream local data entries to filter by Ticker using PDX fields
@@ -84,6 +84,6 @@ public class CalculateMovingAverage200Function implements Function<String[]> {
 
     @Override
     public String getId() {
-        return "calculateMovingAverage200Function";
+        return "calculateMovingAverage200";
     }
 }

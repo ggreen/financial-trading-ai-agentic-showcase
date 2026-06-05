@@ -15,9 +15,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SuggestTradeAdviceFunctionTest {
+class SuggestTradeAdviceProcessorTest {
 
-    private SuggestTradeAdviceFunction subject;
+    private SuggestTradeAdviceProcessor subject;
     private final StockNewsAnalysis news = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
 
     @Mock
@@ -25,7 +25,7 @@ class SuggestTradeAdviceFunctionTest {
 
     @BeforeEach
     void setUp() {
-        subject = new SuggestTradeAdviceFunction(service);
+        subject = new SuggestTradeAdviceProcessor(service);
     }
 
     @Test

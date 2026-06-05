@@ -19,7 +19,7 @@ public class TradeAdviceService {
 
     public TradeAdvice recommend(StockNewsAnalysis stockNewsAnalysis) {
 
-        var movingAverage200 = repository.calculateMovingAverage200(stockNewsAnalysis.getId());
+        var movingAverage200 = repository.calculateMovingAverage200(new String[]{stockNewsAnalysis.getId()});
         var summary200 = TradeParameters.builder()
                 .prediction(stockNewsAnalysis.getPrediction())
                 .movingAverage200(movingAverage200)

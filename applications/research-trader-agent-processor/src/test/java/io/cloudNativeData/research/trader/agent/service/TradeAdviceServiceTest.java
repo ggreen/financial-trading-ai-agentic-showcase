@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ class TradeAdviceServiceTest {
 
         var actual = subject.recommend(news);
 
-        verify(repository).calculateMovingAverage200(anyString());
+        verify(repository).calculateMovingAverage200(any());
 
         assertThat(actual).isEqualTo(expected);
 

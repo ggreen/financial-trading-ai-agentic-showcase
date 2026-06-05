@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class SuggestTradeAdviceFunction implements Function<StockNewsAnalysis, TradeAdvice> {
+public class SuggestTradeAdviceProcessor implements Function<StockNewsAnalysis, TradeAdvice> {
 
     private final TradeAdviceService service;
 

@@ -25,10 +25,10 @@ class CalculateMovingAverage200FunctionTest {
     private CalculateMovingAverage200Function subject;
 
     @Mock
-    private FunctionContext<String[]> fc;
+    private FunctionContext<Object[]> fc;
 
     @Mock
-    private RegionFunctionContext<String[]> rfc;
+    private RegionFunctionContext<Object[]> rfc;
     @Mock
     private ResultSender<Object> rs;
     @Mock
