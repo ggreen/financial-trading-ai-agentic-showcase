@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260608-01-sql
+      author: portfolio-agent
+      comment: "Create risk_profile and portfolio_positions tables using raw SQL"
+      changes:
+        - sql:
+            dbms: postgresql
+            endDelimiter: ";"
+            splitStatements: true
+            sql: |
+              CREATE SCHEMA IF NOT EXISTS portfolio;
+              CREATE TABLE IF NOT EXISTS portfolio.risk_profile (
+                  id BIGINT PRIMARY KEY,
+                  max_allocation_pct NUMERIC(5,4) NOT NULL,
+                  max_portfolio_risk_pct NUMERIC(5,4) NOT NULL
+              );
+
+              CREATE TABLE IF NOT EXISTS portfolio.portfolio_positions (
+                  id BIGINT PRIMARY KEY,
+                  asset_type VARCHAR(10) NOT NULL,
+                  ticker VARCHAR(10) NOT NULL,
+                  quantity NUMERIC(18,4) NOT NULL,
+                  current_price NUMERIC(18,4) NOT NULL
+              );
+
+  - changeSet:
+      id: 20260608-02-sql
+      author: portfolio-agent
+      comment: "Insert initial mock system configurations using raw SQL"
+      changes:
+        - sql:
+            dbms: postgresql
+            endDelimiter: ";"
+            splitStatements: true
+            sql: |
+              INSERT INTO portfolio.risk_profile (id, max_allocation_pct, max_portfolio_risk_pct) 
+              VALUES (1, 0.0500, 0.0200);
+
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price) 
+              VALUES (1, 'CASH', 'USD', 50000.0000, 1.0000);
+
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price) 
+              VALUES (2, 'STOCK', 'AAPL', 250.0000, 180.0000);
