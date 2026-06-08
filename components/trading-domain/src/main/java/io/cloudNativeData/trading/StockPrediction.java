@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * 'sentiment' (BULLISH/BEARISH/NEUTRAL),
  * and 'confidence' (0.0-1.0)."
@@ -15,5 +17,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StockPrediction {
     private MarketSentiment marketSentiment;
-    private double confidence;
+    private BigDecimal confidence;
 }

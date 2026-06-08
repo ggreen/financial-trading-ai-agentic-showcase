@@ -1,5 +1,6 @@
 package io.cloudNativeData.trading;
 
+import io.cloudNativeData.trading.news.StockNewsGeneration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TradeAdvice {
+public class TradeGeneration {
     private String id;
     private TradePrediction tradePrediction;
+    private StockNewsGeneration stockNewsGeneration;
 
 }

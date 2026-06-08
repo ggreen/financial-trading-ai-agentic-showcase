@@ -2,7 +2,6 @@ package io.cloudNativeData.sentiment.agent;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.trading.StockPrediction;
-import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;

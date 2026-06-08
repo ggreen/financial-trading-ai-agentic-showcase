@@ -1,6 +1,5 @@
 package io.cloudNativeData.trading.news;
 
-import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.StockPrediction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,8 +15,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockNewsAnalysis {
-    private String id; //stockId
+public class StockNewsGeneration {
+    private String id;
+    private String ticker;
     private StockPrediction prediction;
     private String rawNews;
 }

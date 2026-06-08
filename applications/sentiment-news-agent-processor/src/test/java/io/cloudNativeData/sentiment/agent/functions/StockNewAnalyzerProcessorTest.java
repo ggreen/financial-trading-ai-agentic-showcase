@@ -4,7 +4,7 @@ import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.sentiment.agent.functions.processor.StockNewAnalyzerProcessor;
 import io.cloudNativeData.trading.StockPrediction;
 import io.cloudNativeData.trading.news.NewsParameters;
-import io.cloudNativeData.trading.news.StockNewsAnalysis;
+import io.cloudNativeData.trading.news.StockNewsGeneration;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,9 +35,10 @@ class StockNewAnalyzerProcessorTest {
     void apply() {
         var prediction = StockPrediction.builder().build();
 
-        StockNewsAnalysis expected = StockNewsAnalysis
+        StockNewsGeneration expected = StockNewsGeneration
                 .builder().id(rawNews.stockTicker())
                 .rawNews(rawNews.rawNews())
+                .ticker(rawNews.stockTicker())
                 .prediction(prediction)
                 .build();
 
