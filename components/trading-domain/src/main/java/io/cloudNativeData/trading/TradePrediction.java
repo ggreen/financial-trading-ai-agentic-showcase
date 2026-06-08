@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class TradePrediction {
     private TradeAction adviceAction;
     private double price;
-    private int quantity;
 }

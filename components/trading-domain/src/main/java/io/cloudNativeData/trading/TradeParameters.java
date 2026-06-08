@@ -15,5 +15,6 @@ import java.math.BigDecimal;
 public class TradeParameters {
 
     private StockPrediction prediction;
+    private BigDecimal currentPrice;
     private BigDecimal movingAverage200;
 }
