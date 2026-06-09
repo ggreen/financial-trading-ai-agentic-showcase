@@ -2,7 +2,7 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
-import io.cloudNativeData.trading.TradeGeneration;
+import io.cloudNativeData.trading.TradeRecommendation;
 import io.cloudNativeData.trading.TradePrediction;
 import io.cloudNativeData.trading.news.StockNewsGeneration;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TradeGenerationServiceTest {
+class TradeRecommendationServiceTest {
 
     private TradeAdviceService subject;
     private final StockNewsGeneration news = JavaBeanGeneratorCreator.of(StockNewsGeneration.class).create();
@@ -36,7 +36,7 @@ class TradeGenerationServiceTest {
     @Test
     void given_news_when_recommendation_then_advice_with_200_day_moving_avg() {
 
-        var expected = TradeGeneration.builder().tradePrediction(prediction)
+        var expected = TradeRecommendation.builder().tradePrediction(prediction)
                 .id(news.getId())
                 .stockNewsGeneration(news)
                 .build();

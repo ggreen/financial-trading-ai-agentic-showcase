@@ -1,10 +1,9 @@
 package io.cloudNativeData.portfolio.agent.service;
 
 import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
-import io.cloudNativeData.trading.PortfolioTradeGeneration;
+import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeAction;
-import io.cloudNativeData.trading.TradeGeneration;
-import io.cloudNativeData.trading.TradePrediction;
+import io.cloudNativeData.trading.TradeRecommendation;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,7 +23,7 @@ class ProposeTradeServiceTest {
 
     @Mock
     private PortfolioRepository repository;
-    private TradeGeneration tradeGeneration;
+    private TradeRecommendation tradeRecommendation;
     private final BigDecimal maxAllocationPerTrade = BigDecimal.TWO;
     private final BigDecimal totalPortfolioValue = BigDecimal.valueOf(20000);
     private final BigDecimal stockPrice =BigDecimal.valueOf(100);
@@ -33,7 +31,7 @@ class ProposeTradeServiceTest {
 
     @BeforeEach
     void setUp() {
-        tradeGeneration = JavaBeanGeneratorCreator.of(TradeGeneration.class).create();
+        tradeRecommendation = JavaBeanGeneratorCreator.of(TradeRecommendation.class).create();
 
         subject = new ProposeTradeService(repository);
     }
@@ -43,21 +41,21 @@ class ProposeTradeServiceTest {
 
         when(repository.findMaxAllocationPerTrade()).thenReturn(maxAllocationPerTrade);
         when(repository.findTotalPortfolioValue()).thenReturn(totalPortfolioValue);
-        tradeGeneration.getTradePrediction().setAdviceAction(TradeAction.BUY);
-        tradeGeneration.getStockNewsGeneration().getPrediction()
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.BUY);
+        tradeRecommendation.getStockNewsGeneration().getPrediction()
                         .setConfidence(newsConfidence);
 
-        tradeGeneration.getTradePrediction().setPrice(stockPrice);
+        tradeRecommendation.getTradePrediction().setPrice(stockPrice);
 
         int expectedQuantity = 340;
 
-        var expected = PortfolioTradeGeneration.builder()
-                .id(tradeGeneration.getId())
-                .tradeGeneration(tradeGeneration)
+        var expected = PortfolioTradeProposal.builder()
+                .id(tradeRecommendation.getId())
+                .tradeRecommendation(tradeRecommendation)
                 .quantity(expectedQuantity)
                 .build();
 
-        var actual = subject.propose(tradeGeneration);
+        var actual = subject.propose(tradeRecommendation);
 
         assertThat(actual).isEqualTo(expected);
     }

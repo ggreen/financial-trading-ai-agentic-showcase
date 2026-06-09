@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TradeGeneration {
+public class TradeRecommendation {
     private String id;
     private TradePrediction tradePrediction;
     private StockNewsGeneration stockNewsGeneration;

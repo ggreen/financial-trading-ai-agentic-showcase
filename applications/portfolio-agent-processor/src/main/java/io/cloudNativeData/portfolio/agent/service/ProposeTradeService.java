@@ -1,35 +1,34 @@
 package io.cloudNativeData.portfolio.agent.service;
 
 import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
-import io.cloudNativeData.trading.PortfolioTradeGeneration;
-import io.cloudNativeData.trading.TradeGeneration;
+import io.cloudNativeData.trading.PortfolioTradeProposal;
+import io.cloudNativeData.trading.TradeRecommendation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-
-import static io.cloudNativeData.trading.TradeAction.BUY;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
 public class ProposeTradeService {
     private final PortfolioRepository repository;
 
-    public PortfolioTradeGeneration propose(TradeGeneration trade) {
+    public PortfolioTradeProposal propose(TradeRecommendation trade) {
         var quantity =
                 switch (trade.getTradePrediction().getAdviceAction()) {
                     case BUY -> determineBuy(trade);
                     default -> 0;
                 };
 
-        return PortfolioTradeGeneration.builder()
+        return PortfolioTradeProposal.builder()
                 .quantity(quantity)
-                .tradeGeneration(trade)
+                .tradeRecommendation(trade)
                 .id(trade.getId())
                 .build();
     }
 
-    public int determineBuy(TradeGeneration advice) {
+    public int determineBuy(TradeRecommendation advice) {
 
         var stockMarketPrice = advice.getTradePrediction().getPrice();
         if (stockMarketPrice.compareTo(BigDecimal.ZERO) <= 0) {
@@ -46,7 +45,9 @@ public class ProposeTradeService {
                 .getPrediction().getConfidence());
 
         // 4. Calculate share quantity
-        BigDecimal targetQuantity = allocatedCapital.divide(stockMarketPrice);
+        BigDecimal targetQuantity = allocatedCapital.divide(stockMarketPrice,
+                4, RoundingMode.HALF_UP
+        );
 
         // 5. Return as a whole integer (rounding down to be safe)
         return targetQuantity.intValue();
