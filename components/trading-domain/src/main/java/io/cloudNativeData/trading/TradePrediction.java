@@ -14,4 +14,5 @@ import java.math.BigDecimal;
 public class TradePrediction {
     private TradeAction adviceAction;
     private BigDecimal price;
+    private double tradeConfidence;
 }
