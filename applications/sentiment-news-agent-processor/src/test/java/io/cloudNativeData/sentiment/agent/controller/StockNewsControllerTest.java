@@ -23,7 +23,7 @@ class StockNewsControllerTest {
     private StockNewsAnalyzerService service;
 
     @Mock
-    Publisher<StockNewsAnalysis> publisher;
+    private Publisher<StockNewsAnalysis> publisher;
 
     private StockNewsController subject;
     private final NewsParameters newsParameters = JavaBeanGeneratorCreator.of(NewsParameters.class).create();
