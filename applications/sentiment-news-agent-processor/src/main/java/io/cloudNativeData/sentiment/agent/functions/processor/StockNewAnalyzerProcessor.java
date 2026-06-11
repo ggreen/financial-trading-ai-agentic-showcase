@@ -19,7 +19,7 @@ public class StockNewAnalyzerProcessor implements Function<NewsParameters, Stock
         var prediction =  inference.infer(newsParameters);
 
         return StockNewsGeneration.builder()
-                .prediction(prediction)
+                .stockPrediction(prediction)
                 .id(newsParameters.stockTicker())
                 .ticker(newsParameters.stockTicker())
                         .rawNews(newsParameters.rawNews()).build();

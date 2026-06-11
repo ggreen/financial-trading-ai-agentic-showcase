@@ -1,9 +1,11 @@
 package io.cloudNativeData.portfolio.agent.service;
 
+import io.cloudNativeData.portfolio.agent.ai.RiskInference;
 import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
 import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeRecommendation;
+import io.cloudNativeData.trading.risk.TradeRiskParameters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,13 @@ import java.math.RoundingMode;
 @RequiredArgsConstructor
 public class ProposeTradeService {
     private final PortfolioRepository repository;
+    private final RiskInference riskInference;
 
+    /**
+     *
+     * @param trade trade recommendation
+     * @return the trader proposal
+     */
     public PortfolioTradeProposal propose(TradeRecommendation trade) {
         var quantity =
                 switch (trade.getTradePrediction().getAdviceAction()) {
@@ -23,10 +31,22 @@ public class ProposeTradeService {
                     default -> 0;
                 };
 
+        //Calculate risk
+        var riskPrediction = riskInference.predict(
+                TradeRiskParameters.builder()
+                        .stockPrediction(trade.getStockNewsGeneration().getStockPrediction())
+                        .tradeAction(trade.getTradePrediction().getAdviceAction())
+                        .newsSummary(trade.getStockNewsGeneration().getStockPrediction().getNewsSummary())
+                        .ticker(trade.getStockNewsGeneration().getTicker())
+                        .quantity(quantity)
+                        .build());
+
+
         return PortfolioTradeProposal.builder()
                 .quantity(quantity)
                 .tradeRecommendation(trade)
                 .id(trade.getId())
+                .riskPrediction(riskPrediction)
                 .build();
     }
 
@@ -37,17 +57,17 @@ public class ProposeTradeService {
     private StockNewsGeneration stockNewsGeneration;
     private BigDecimal price;
         private StockPrediction prediction_bull_or_bearish ;
-    private String rawNews;
+    private String newsSummary;
      */
     private int determineSellQuantity(TradeRecommendation trade) {
-        // 1. Sanity check: If trade data or prediction is null, do nothing.
+        // 1. Sanity check: If trade data or stockPrediction is null, do nothing.
         if (trade == null
-                || trade.getStockNewsGeneration().getPrediction() == null
-                || trade.getStockNewsGeneration().getPrediction().getMarketSentiment() == null) {
+                || trade.getStockNewsGeneration().getStockPrediction() == null
+                || trade.getStockNewsGeneration().getStockPrediction().getMarketSentiment() == null) {
             return 0;
         }
 
-        var bullOrBearish = trade.getStockNewsGeneration().getPrediction().getMarketSentiment();
+        var bullOrBearish = trade.getStockNewsGeneration().getStockPrediction().getMarketSentiment();
 
         var ticker = trade.getStockNewsGeneration().getTicker();
         // 2. If the outlook is Bullish, we hold.
@@ -91,7 +111,7 @@ public class ProposeTradeService {
         // 3. Scale the capital based on the AI/News conviction score
         // If sentiment is 0.5, we only use 50% of our maximum allowed capital
         var allocatedCapital = maxTradeCapital.multiply(advice.getStockNewsGeneration()
-                .getPrediction().getConfidence());
+                .getStockPrediction().getSentimentConfidence());
 
         // 4. Calculate share quantity
         var targetQuantity = allocatedCapital.divide(stockMarketPrice,

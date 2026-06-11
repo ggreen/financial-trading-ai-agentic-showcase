@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 public class StockNewsGeneration {
     private String id;
     private String ticker;
-    private StockPrediction prediction;
+    private StockPrediction stockPrediction;
     private String rawNews;
 }

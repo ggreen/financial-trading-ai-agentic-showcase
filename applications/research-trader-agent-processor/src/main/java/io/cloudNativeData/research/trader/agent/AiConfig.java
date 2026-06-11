@@ -41,7 +41,7 @@ public class AiConfig {
                     .create(Map.of(
                             "movingAverage200", tradeParameters.getMovingAverage200(),
                             "marketSentiment", tradeParameters.getPrediction().getMarketSentiment(),
-                            "marketSentimentConfidence",tradeParameters.getPrediction().getConfidence())
+                            "marketSentimentConfidence",tradeParameters.getPrediction().getSentimentConfidence())
                     );
 
             return chatClient.prompt(prompt)

@@ -17,5 +17,6 @@ import java.math.BigDecimal;
 @Builder
 public class StockPrediction {
     private MarketSentiment marketSentiment;
-    private BigDecimal confidence;
+    private BigDecimal sentimentConfidence;
+    private String newsSummary;
 }

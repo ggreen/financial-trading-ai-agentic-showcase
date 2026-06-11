@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Analyzer Processor</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/@clr/ui/clr-ui.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <style>
+        body {
+            background-color: #f4f4f4;
+            padding: 24px;
+        }
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .response-card {
+            margin-top: 24px;
+            display: none;
+        }
+        .badge-bullish {
+            background-color: #1D5100;
+            color: #78DE2A;
+        }
+        .badge-bearish {
+            background-color: #610B00;
+            color: #F59F9F;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <header class="header-6">
+        <div class="branding">
+            <span class="title">Stock Analyzer Processor</span>
+        </div>
+    </header>
+
+    <div class="content-area" style="padding-top: 20px;">
+        <form id="stockForm" class="clr-form clr-form-horizontal">
+
+            <div class="clr-form-control">
+                <label for="stockTicker" class="clr-control-label">Stock Ticker</label>
+                <div class="clr-control-container">
+                    <div class="clr-input-wrapper">
+                        <input type="text" id="stockTicker" placeholder="e.g., AAPL" class="clr-input" style="width: 100%; max-width: 200px;" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clr-form-control">
+                <label class="clr-control-label">Raw News Content</label>
+                <div class="clr-control-container" style="width: 100%;">
+                    <textarea id="rawNews"></textarea>
+                </div>
+            </div>
+
+            <div class="clr-form-control" style="padding-top: 16px;">
+                <div class="clr-control-container">
+                    <button type="submit" class="btn btn-primary">Analyze Stock</button>
+                    <span id="loadingSpinner" class="spinner spinner-inline" style="display: none; margin-left: 12px;">Loading...</span>
+                </div>
+            </div>
+        </form>
+
+        <div id="responseCard" class="card response-card">
+            <div class="card-header">
+                Analysis Results
+            </div>
+            <div class="card-block">
+                <div class="card-text">
+                    <p><strong>Ticker:</strong> <span id="resTicker"></span></p>
+                    <p><strong>Sentiment:</strong> <span id="resSentiment" class="badge"></span></p>
+                    <p><strong>Confidence:</strong> <span id="resConfidence"></span></p>
+                    <p><strong>Summary:</strong></p>
+                    <blockquote class="blockquote" id="resSummary"></blockquote>
+                </div>
+            </div>
+            <div class="card-footer">
+                <details>
+                    <summary style="cursor: pointer; color: #007cbb;">View Raw JSON Response</summary>
+                    <pre style="margin-top: 10px; background: #f4f4f4; padding: 10px; border-radius: 3px;"><code id="rawJson"></code></pre>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize TinyMCE WYSIWYG Editor
+    tinymce.init({
+        selector: '#rawNews',
+        height: 250,
+        menubar: false,
+        plugins: 'lists link wordcount',
+        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
+        content_style: 'body { font-family:Metropolis,Avenir Next,Helvetica Neue,Arial,sans-serif; font-size:14px }'
+    });
+
+    // Handle Form Submission
+    document.getElementById('stockForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const spinner = document.getElementById('loadingSpinner');
+        const responseCard = document.getElementById('responseCard');
+        spinner.style.display = 'inline-block';
+        responseCard.style.display = 'none';
+
+        // Get values from inputs (TinyMCE uses triggerSave to sync content back to the textarea)
+        tinymce.triggerSave();
+        const stockTicker = document.getElementById('stockTicker').value;
+        const rawNews = document.getElementById('rawNews').value;
+
+        const payload = {
+            stockTicker: stockTicker,
+            rawNews: rawNews
+        };
+
+        try {
+            const response = await fetch('functions/stockNewAnalyzerProcessor', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+            const data = await response.json();
+
+            // Populate Tanzu/Clarity styled results UI
+            document.getElementById('resTicker').innerText = data.ticker || data.id;
+
+            const sentimentBadge = document.getElementById('resSentiment');
+            const sentiment = data.stockPrediction?.marketSentiment || 'UNKNOWN';
+            sentimentBadge.innerText = sentiment;
+
+            // Dynamic styling based on sentiment
+            sentimentBadge.className = 'badge';
+            if (sentiment === 'BULLISH') sentimentBadge.classList.add('badge-bullish');
+            if (sentiment === 'BEARISH') sentimentBadge.classList.add('badge-bearish');
+
+            document.getElementById('resConfidence').innerText = `${((data.stockPrediction?.sentimentConfidence || 0) * 100).toFixed(1)}%`;
+            document.getElementById('resSummary').innerText = data.stockPrediction?.newsSummary || 'No summary available.';
+
+            // Populate Raw JSON block
+            document.getElementById('rawJson').innerText = JSON.stringify(data, null, 2);
+
+            // Show result card
+            responseCard.style.display = 'block';
+
+        } catch (error) {
+            alert('An error occurred while communicating with the processor API: ' + error.message);
+        } finally {
+            spinner.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>

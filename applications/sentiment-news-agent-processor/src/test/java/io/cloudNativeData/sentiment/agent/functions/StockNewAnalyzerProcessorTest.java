@@ -39,7 +39,7 @@ class StockNewAnalyzerProcessorTest {
                 .builder().id(rawNews.stockTicker())
                 .rawNews(rawNews.rawNews())
                 .ticker(rawNews.stockTicker())
-                .prediction(prediction)
+                .stockPrediction(prediction)
                 .build();
 
         when(inference.infer(rawNews)).thenReturn(prediction);
