@@ -1,13 +1,10 @@
 package io.cloudNativeData.trading;
 
-import io.cloudNativeData.trading.news.StockNewsGeneration;
-import io.cloudNativeData.trading.risk.RiskPrediction;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +13,5 @@ import java.math.BigDecimal;
 public class TradeRecommendation {
     private String id;
     private TradePrediction tradePrediction;
-    private StockNewsGeneration stockNewsGeneration;
+    private StockNewsAnalysis stockNewsAnalysis;
 }

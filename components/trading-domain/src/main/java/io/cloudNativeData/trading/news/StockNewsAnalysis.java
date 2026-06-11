@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StockNewsGeneration {
+public class StockNewsAnalysis {
     private String id;
     private String ticker;
     private StockPrediction stockPrediction;

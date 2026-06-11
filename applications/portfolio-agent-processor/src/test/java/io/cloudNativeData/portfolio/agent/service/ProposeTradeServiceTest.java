@@ -56,7 +56,7 @@ class ProposeTradeServiceTest {
         when(repository.findTotalPortfolioValue()).thenReturn(totalPortfolioValue);
 
         tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.BUY);
-        tradeRecommendation.getStockNewsGeneration().getStockPrediction()
+        tradeRecommendation.getStockNewsAnalysis().getStockPrediction()
                         .setSentimentConfidence(newsConfidence);
 
         tradeRecommendation.getTradePrediction().setPrice(stockPrice);
@@ -80,11 +80,11 @@ class ProposeTradeServiceTest {
     void given_sell_trade_when_propose_then_return_trade() {
 
         tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
-        tradeRecommendation.getStockNewsGeneration()
+        tradeRecommendation.getStockNewsAnalysis()
                 .getStockPrediction()
                 .setMarketSentiment(MarketSentiment.BEARISH);
 
-        tradeRecommendation.getStockNewsGeneration()
+        tradeRecommendation.getStockNewsAnalysis()
                 .getStockPrediction()
                 .setSentimentConfidence(newsConfidence);
 
@@ -113,7 +113,7 @@ class ProposeTradeServiceTest {
 
 
 
-{"id":"33","stockNewsGeneration":
+{"id":"33","stockNewsAnalysis":
 {"id":"33","stockPrediction":{"confidence":
 0.33,"marketSentiment":"BULLISH"},
 "newsSummary":"Good",

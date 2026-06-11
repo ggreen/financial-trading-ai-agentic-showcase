@@ -34,10 +34,10 @@ public class ProposeTradeService {
         //Calculate risk
         var riskPrediction = riskInference.predict(
                 TradeRiskParameters.builder()
-                        .stockPrediction(trade.getStockNewsGeneration().getStockPrediction())
+                        .stockPrediction(trade.getStockNewsAnalysis().getStockPrediction())
                         .tradeAction(trade.getTradePrediction().getAdviceAction())
-                        .newsSummary(trade.getStockNewsGeneration().getStockPrediction().getNewsSummary())
-                        .ticker(trade.getStockNewsGeneration().getTicker())
+                        .newsSummary(trade.getStockNewsAnalysis().getStockPrediction().getNewsSummary())
+                        .ticker(trade.getStockNewsAnalysis().getTicker())
                         .quantity(quantity)
                         .build());
 
@@ -54,7 +54,7 @@ public class ProposeTradeService {
      Implement determine stock trade sell quantity
         private String id;
     private TradePrediction tradePrediction;
-    private StockNewsGeneration stockNewsGeneration;
+    private StockNewsAnalysis stockNewsAnalysis;
     private BigDecimal price;
         private StockPrediction prediction_bull_or_bearish ;
     private String newsSummary;
@@ -62,14 +62,14 @@ public class ProposeTradeService {
     private int determineSellQuantity(TradeRecommendation trade) {
         // 1. Sanity check: If trade data or stockPrediction is null, do nothing.
         if (trade == null
-                || trade.getStockNewsGeneration().getStockPrediction() == null
-                || trade.getStockNewsGeneration().getStockPrediction().getMarketSentiment() == null) {
+                || trade.getStockNewsAnalysis().getStockPrediction() == null
+                || trade.getStockNewsAnalysis().getStockPrediction().getMarketSentiment() == null) {
             return 0;
         }
 
-        var bullOrBearish = trade.getStockNewsGeneration().getStockPrediction().getMarketSentiment();
+        var bullOrBearish = trade.getStockNewsAnalysis().getStockPrediction().getMarketSentiment();
 
-        var ticker = trade.getStockNewsGeneration().getTicker();
+        var ticker = trade.getStockNewsAnalysis().getTicker();
         // 2. If the outlook is Bullish, we hold.
         if (MarketSentiment.BULLISH.equals(bullOrBearish)) {
             return 0;
@@ -90,7 +90,7 @@ public class ProposeTradeService {
             int finalSellQuantity = (int) (baseSellQuantity * confidenceMultiplier);
 
             // Optional: Caps to ensure you don't over-sell past standard risk limits
-            int maxSellLimit = repository.findMaxSellLimit(trade.getStockNewsGeneration().getTicker());
+            int maxSellLimit = repository.findMaxSellLimit(trade.getStockNewsAnalysis().getTicker());
             return Math.min(finalSellQuantity, maxSellLimit);
         }
 
@@ -110,7 +110,7 @@ public class ProposeTradeService {
 
         // 3. Scale the capital based on the AI/News conviction score
         // If sentiment is 0.5, we only use 50% of our maximum allowed capital
-        var allocatedCapital = maxTradeCapital.multiply(advice.getStockNewsGeneration()
+        var allocatedCapital = maxTradeCapital.multiply(advice.getStockNewsAnalysis()
                 .getStockPrediction().getSentimentConfidence());
 
         // 4. Calculate share quantity

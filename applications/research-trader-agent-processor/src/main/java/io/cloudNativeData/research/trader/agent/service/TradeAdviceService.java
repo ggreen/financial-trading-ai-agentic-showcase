@@ -2,7 +2,7 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
-import io.cloudNativeData.trading.news.StockNewsGeneration;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.TradeParameters;
 import io.cloudNativeData.trading.TradeRecommendation;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +17,11 @@ public class TradeAdviceService {
     private final TradePredictionInference inference;
     private final StockPricingExecution repository;
 
-    public TradeRecommendation recommend(StockNewsGeneration stockNewsGeneration) {
+    public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
 
-        var movingAverage200 = repository.calculateMovingAverage200(new String[]{stockNewsGeneration.getId()});
+        var movingAverage200 = repository.calculateMovingAverage200(new String[]{stockNewsAnalysis.getId()});
         var summary200 = TradeParameters.builder()
-                .prediction(stockNewsGeneration.getStockPrediction())
+                .prediction(stockNewsAnalysis.getStockPrediction())
                 .movingAverage200(movingAverage200)
                 .build();
 
@@ -30,9 +30,9 @@ public class TradeAdviceService {
         log.info("predication: {}", tradePrediction);
         return TradeRecommendation
                 .builder()
-                .id(stockNewsGeneration.getId())
+                .id(stockNewsAnalysis.getId())
                 .tradePrediction(tradePrediction)
-                .stockNewsGeneration(stockNewsGeneration)
+                .stockNewsAnalysis(stockNewsAnalysis)
                 .build();
     }
 }

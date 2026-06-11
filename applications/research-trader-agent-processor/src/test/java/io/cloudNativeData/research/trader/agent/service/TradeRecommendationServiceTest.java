@@ -4,7 +4,7 @@ import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.trading.TradeRecommendation;
 import io.cloudNativeData.trading.TradePrediction;
-import io.cloudNativeData.trading.news.StockNewsGeneration;
+import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class TradeRecommendationServiceTest {
 
     private TradeAdviceService subject;
-    private final StockNewsGeneration news = JavaBeanGeneratorCreator.of(StockNewsGeneration.class).create();
+    private final StockNewsAnalysis news = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
     @Mock
     private StockPricingExecution repository;
     @Mock
@@ -38,7 +38,7 @@ class TradeRecommendationServiceTest {
 
         var expected = TradeRecommendation.builder().tradePrediction(prediction)
                 .id(news.getId())
-                .stockNewsGeneration(news)
+                .stockNewsAnalysis(news)
                 .build();
 
 
