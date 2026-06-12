@@ -32,12 +32,12 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         [v-cloak] { display: none; }
 
-        /* Custom scrollbar styling for the popup container */
+        /* Custom scrollbar styling for the popup containers */
         .custom-popup-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
         }
         .custom-popup-scroll::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #0f172a;
             border-radius: 4px;
         }
         .custom-popup-scroll::-webkit-scrollbar-thumb {
@@ -173,12 +173,16 @@
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-tanzu-border/60 text-sm">
-                        <tr v-for="item in recommendations" :key="item.id" class="hover:bg-slate-800/40 transition">
+
+                        <tr v-for="item in recommendations"
+                            :key="item.id"
+                            @click="selectItem(item)"
+                            class="hover:bg-slate-800/60 transition cursor-pointer group">
 
                             <td class="py-3.5 px-4 font-mono font-bold text-white">
-                                        <span class="bg-tanzu-blue/10 text-tanzu-blue px-2.5 py-1 rounded border border-tanzu-blue/30 tracking-wide text-xs">
-                                            {{ item.id }}
-                                        </span>
+                                <span class="bg-tanzu-blue/10 text-tanzu-blue group-hover:bg-tanzu-blue group-hover:text-white px-2.5 py-1 rounded border border-tanzu-blue/30 tracking-wide text-xs transition-colors">
+                                    {{ item.id }}
+                                </span>
                             </td>
 
                             <td class="py-3.5 px-4 max-w-sm text-xs text-slate-200 leading-normal">
@@ -216,24 +220,9 @@
                             </td>
 
                             <td class="py-3.5 px-4 text-right">
-                                <div class="relative inline-block text-left group">
-                                    <div class="inline-block bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border font-mono text-[11px] text-amber-400 max-w-[160px] truncate cursor-help">
-                                        <i class="fa-solid fa-terminal text-tanzu-gray text-[9px] mr-1"></i>
-                                        <code>{{ item.stockNewsAnalysis?.rawNews }}</code>
-                                    </div>
-
-                                    <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block z-30 w-80 bg-slate-900 border border-tanzu-border rounded-lg shadow-2xl p-4 text-left font-sans text-xs text-slate-300 transition-all duration-200">
-                                        <div class="border-b border-tanzu-border pb-1.5 mb-2 font-mono text-[10px] uppercase tracking-wider text-tanzu-gray flex justify-between items-center">
-                                            <span><i class="fa-solid fa-code text-tanzu-blue mr-1"></i> Expanded Payload</span>
-                                            <span class="text-amber-400">HTML Format</span>
-                                        </div>
-
-                                        <div class="custom-popup-scroll max-h-32 overflow-y-auto pr-1 break-words text-slate-300 font-mono text-[11px] leading-relaxed"
-                                             v-html="item.stockNewsAnalysis?.rawNews || '<em>No payload available</em>'">
-                                        </div>
-
-                                        <div class="absolute top-full right-6 -mt-1 border-4 border-transparent border-t-slate-900"></div>
-                                    </div>
+                                <div class="inline-block bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border font-mono text-[11px] text-amber-400 max-w-[160px] truncate">
+                                    <i class="fa-solid fa-expand text-tanzu-gray text-[9px] mr-1"></i>
+                                    <code>View Flow</code>
                                 </div>
                             </td>
 
@@ -251,13 +240,107 @@
                 </div>
             </div>
 
-            <div v-if="error" class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start space-x-3">
-                <i class="fa-solid fa-circle-exclamation text-red-400 text-base mt-0.5"></i>
-                <div>
-                    <h4 class="text-xs font-bold text-red-400 uppercase tracking-wider mb-0.5">XHR Network Connectivity Interrupted</h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">
-                        Could not communicate with the local engine on <code class="bg-slate-900 px-1 rounded text-amber-400 font-mono">http://localhost:8066/trades/recommendations</code>. Ensure your back-end application service is running and CORS allows incoming browser requests. Turn on **Simulate Live API Engine** at the top right to view layout functionality.
-                    </p>
+            <div v-if="selectedItem" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="closePopup">
+                <div class="bg-slate-900 border border-tanzu-border rounded-xl shadow-2xl max-w-4xl w-full flex flex-col max-h-[85vh]">
+
+                    <div class="p-4 border-b border-tanzu-border flex items-center justify-between bg-slate-900/50">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="bg-tanzu-blue text-slate-950 px-2 py-0.5 rounded font-mono font-bold text-xs">
+                                {{ selectedItem.id }}
+                            </span>
+                            <h3 class="text-sm font-bold text-white tracking-tight">Signal Analysis Vector Engine</h3>
+                        </div>
+                        <button @click="closePopup" class="text-tanzu-gray hover:text-white transition p-1 text-sm">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 overflow-y-auto custom-popup-scroll space-y-6 bg-tanzu-bg/30">
+                        <div class="flex flex-col md:flex-row items-center md:items-stretch gap-4 md:gap-2">
+
+                            <div class="flex-1 bg-slate-900 border border-tanzu-border rounded-lg p-4 flex flex-col justify-between w-full">
+                                <div>
+                                    <div class="text-[10px] font-bold tracking-wider text-tanzu-blue uppercase font-mono mb-2 flex items-center justify-between">
+                                        <span>Box 1: Ingested Core Pipeline</span>
+                                        <span class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded text-[9px]">SOURCE</span>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Target Ticker Identifier</label>
+                                        <div class="font-mono font-bold text-white text-base bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border inline-block">
+                                            {{ selectedItem.stockNewsAnalysis?.ticker || 'N/A' }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Raw News Struct Payload</label>
+                                        <div class="p-3 bg-tanzu-bg rounded border border-tanzu-border font-mono text-xs text-amber-400 leading-relaxed max-h-48 overflow-y-auto custom-popup-scroll" v-html="selectedItem.stockNewsAnalysis?.rawNews || 'No raw news content available'">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-center px-2 py-1 md:py-0 text-tanzu-blue">
+                                <i class="fa-solid fa-circle-arrow-right text-2xl hidden md:block animate-pulse"></i>
+                                <i class="fa-solid fa-circle-arrow-down text-2xl md:hidden animate-pulse"></i>
+                            </div>
+
+                            <div class="flex-1 bg-slate-900 border border-tanzu-border rounded-lg p-4 flex flex-col justify-between w-full">
+                                <div>
+                                    <div class="text-[10px] font-bold tracking-wider text-tanzu-green uppercase font-mono mb-2 flex items-center justify-between">
+                                        <span>Box 2: Derived AI Intelligence</span>
+                                        <span class="bg-slate-800 text-tanzu-green px-1.5 py-0.5 rounded text-[9px]">OUTPUT</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3 mb-4">
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Market Sentiment</label>
+                                            <span :class="selectedItem.stockNewsAnalysis?.stockPrediction?.marketSentiment === 'BULLISH' ? 'bg-tanzu-green/10 text-tanzu-green border-tanzu-green/30' : 'bg-red-500/10 text-red-400 border-red-500/30'" class="text-[11px] font-bold px-2 py-1 rounded border block text-center font-mono">
+                                                {{ selectedItem.stockNewsAnalysis?.stockPrediction?.marketSentiment || 'UNKNOWN' }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Advice Execution Action</label>
+                                            <span v-if="selectedItem.tradePrediction?.adviceAction" class="bg-purple-500/20 text-purple-300 text-[11px] font-bold px-2 py-1 rounded border border-purple-500/40 font-mono block text-center">
+                                                {{ selectedItem.tradePrediction.adviceAction }}
+                                            </span>
+                                            <span v-else class="bg-amber-500/10 text-amber-500 text-[11px] font-bold px-2 py-1 rounded border border-amber-500/30 font-mono block text-center">
+                                                SUSPEND_NULL
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3 mb-4">
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Target Entry Price</label>
+                                            <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
+                                                {{ selectedItem.tradePrediction?.price ? '$' + selectedItem.tradePrediction.price.toFixed(2) : '--' }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Model Trade Confidence</label>
+                                            <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
+                                                {{ ((selectedItem.tradePrediction?.tradeConfidence || 0) * 100).toFixed(1) }}%
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Cognitive Summary Interpretation</label>
+                                        <div class="p-3 bg-tanzu-bg rounded border border-tanzu-border text-xs text-slate-200 leading-normal h-[76px] overflow-y-auto custom-popup-scroll">
+                                            {{ selectedItem.stockNewsAnalysis?.stockPrediction?.newsSummary || 'Metrics failed compilation summary.' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-950/40 border-t border-tanzu-border flex justify-end px-4">
+                        <button @click="closePopup" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-1.5 rounded text-white transition">
+                            Close Vector Matrix
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -286,9 +369,11 @@
             const pollInterval = ref(5000);
             const usingMock = ref(true);
             const lastUpdated = ref('');
+
+            // New active modal selection node tracking reference
+            const selectedItem = ref(null);
             let timer = null;
 
-            // Expanded mock rawNews content text blocks to immediately showcase the new scroll functionality out-of-the-box
             const payloadMockData = [
                 {
                     "id": "VMW",
@@ -359,6 +444,15 @@
                 }
             };
 
+            // Modal Trigger Actions
+            const selectItem = (item) => {
+                selectedItem.value = item;
+            };
+
+            const closePopup = () => {
+                selectedItem.value = null;
+            };
+
             const nullActionCount = computed(() => {
                 return recommendations.value.filter(item => !item.tradePrediction?.adviceAction).length;
             });
@@ -380,10 +474,13 @@
                 pollInterval,
                 usingMock,
                 lastUpdated,
+                selectedItem,
                 nullActionCount,
                 fetchData,
                 toggleMock,
-                resetPolling
+                resetPolling,
+                selectItem,
+                closePopup
             };
         }
     }).mount('#app');
