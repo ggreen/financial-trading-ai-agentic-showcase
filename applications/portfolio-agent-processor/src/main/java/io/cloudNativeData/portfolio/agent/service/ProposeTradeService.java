@@ -6,15 +6,18 @@ import io.cloudNativeData.portfolio.agent.repository.QueryPortfolioRepository;
 import io.cloudNativeData.portfolio.agent.repository.entities.PortfolioTradeEntity;
 import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
+import io.cloudNativeData.trading.ProposalStatus;
 import io.cloudNativeData.trading.TradeRecommendation;
 import io.cloudNativeData.trading.risk.TradeRiskParameters;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProposeTradeService {
@@ -29,30 +32,51 @@ public class ProposeTradeService {
      * @return the trader proposal
      */
     public PortfolioTradeProposal propose(TradeRecommendation trade) {
-        var quantity =
-                switch (trade.getTradePrediction().getAdviceAction()) {
-                    case BUY -> determineBuyQuantity(trade);
-                    case SELL -> determineSellQuantity(trade);
-                    default -> 0;
-                };
 
-        //Calculate risk
-        var riskPrediction = riskInference.predict(
-                TradeRiskParameters.builder()
-                        .stockPrediction(trade.getStockNewsAnalysis().getStockPrediction())
-                        .tradeAction(trade.getTradePrediction().getAdviceAction())
-                        .newsSummary(trade.getStockNewsAnalysis().getStockPrediction().getNewsSummary())
-                        .ticker(trade.getStockNewsAnalysis().getTicker())
-                        .quantity(quantity)
-                        .build());
+        var tradeAction = trade.getTradePrediction().getAdviceAction();
+
+        log.info("Proposing trade action: {}", tradeAction);
+
+        PortfolioTradeProposal proposal;
+        if(tradeAction == null)
+        {
+            log.error("Proposing trade action is null, will not process, because a proposal is invalid");
+            proposal = PortfolioTradeProposal.builder()
+                    .id(trade.getId())
+                    .tradeRecommendation(trade)
+                    .proposalStatus(ProposalStatus.Invalid)
+                    .build();
+
+        }
+        else{
+
+            var quantity =
+                    switch (tradeAction) {
+                        case BUY -> determineBuyQuantity(trade);
+                        case SELL -> determineSellQuantity(trade);
+                        default -> 0;
+                    };
+
+            //Calculate risk
+            var riskPrediction = riskInference.predict(
+                    TradeRiskParameters.builder()
+                            .stockPrediction(trade.getStockNewsAnalysis().getStockPrediction())
+                            .tradeAction(trade.getTradePrediction().getAdviceAction())
+                            .newsSummary(trade.getStockNewsAnalysis().getStockPrediction().getNewsSummary())
+                            .ticker(trade.getStockNewsAnalysis().getTicker())
+                            .quantity(quantity)
+                            .build());
 
 
-        var proposal = PortfolioTradeProposal.builder()
-                .quantity(quantity)
-                .tradeRecommendation(trade)
-                .id(trade.getId())
-                .riskPrediction(riskPrediction)
-                .build();
+            proposal = PortfolioTradeProposal.builder()
+                    .quantity(quantity)
+                    .tradeRecommendation(trade)
+                    .id(trade.getId())
+                    .riskPrediction(riskPrediction)
+                    .proposalStatus(ProposalStatus.Valid)
+                    .build();
+        }
+
 
         return saveProposal(proposal);
 

@@ -7,5 +7,6 @@ import lombok.Builder;
 public record PortfolioTradeProposal(String id,
                                      int quantity,
                                      TradeRecommendation tradeRecommendation,
-                                     RiskPrediction riskPrediction)  {
+                                     RiskPrediction riskPrediction,
+                                     ProposalStatus proposalStatus)  {
 }
