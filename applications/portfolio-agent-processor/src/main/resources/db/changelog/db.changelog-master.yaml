@@ -23,7 +23,9 @@ databaseChangeLog:
                   quantity NUMERIC(18,4) NOT NULL,
                   current_price NUMERIC(18,4) NOT NULL
               );
-
+              
+              create table portfolio.portfolio_trade_entity 
+              (id varchar(255) not null, payload jsonb not null, primary key (id));
   - changeSet:
       id: 20260608-02-sql
       author: portfolio-agent
@@ -34,6 +36,7 @@ databaseChangeLog:
             endDelimiter: ";"
             splitStatements: true
             sql: |
+              CREATE SCHEMA IF NOT EXISTS portfolio;
               INSERT INTO portfolio.risk_profile (id, max_allocation_pct, max_portfolio_risk_pct) 
               VALUES (1, 0.0500, 0.0200);
 
