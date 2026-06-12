@@ -1,7 +1,9 @@
 package io.cloudNativeData.portfolio.agent.service;
 
 import io.cloudNativeData.portfolio.agent.ai.RiskInference;
-import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
+import io.cloudNativeData.portfolio.agent.repository.PortfolioTradeRepository;
+import io.cloudNativeData.portfolio.agent.repository.QueryPortfolioRepository;
+import io.cloudNativeData.portfolio.agent.repository.entities.PortfolioTradeEntity;
 import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeAction;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.convert.converter.Converter;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
@@ -29,12 +32,22 @@ class ProposeTradeServiceTest {
     private ProposeTradeService subject;
 
     @Mock
-    private PortfolioRepository repository;
+    private QueryPortfolioRepository queryPortfolioRepository;
 
     @Mock
     private RiskInference riskInference;
 
+    @Mock
+    private PortfolioTradeRepository portfolioTradeRepository;
+
+    @Mock
+    private Converter<PortfolioTradeProposal, PortfolioTradeEntity> converter;
+
     private TradeRecommendation tradeRecommendation;
+
+    private final PortfolioTradeEntity  portfolioTradeEntity = JavaBeanGeneratorCreator.of(PortfolioTradeEntity.class)
+            .create();
+
     private final BigDecimal maxAllocationPerTrade = BigDecimal.TWO;
     private final BigDecimal totalPortfolioValue = BigDecimal.valueOf(20000);
     private final BigDecimal stockPrice =BigDecimal.valueOf(100);
@@ -46,14 +59,15 @@ class ProposeTradeServiceTest {
     void setUp() {
         tradeRecommendation = JavaBeanGeneratorCreator.of(TradeRecommendation.class).create();
 
-        subject = new ProposeTradeService(repository,riskInference);
+        subject = new ProposeTradeService(queryPortfolioRepository,riskInference,portfolioTradeRepository, converter);
     }
 
     @Test
     void given_buy_trade_when_propose_then_return_trade() {
 
-        when(repository.findMaxAllocationPerTrade()).thenReturn(maxAllocationPerTrade);
-        when(repository.findTotalPortfolioValue()).thenReturn(totalPortfolioValue);
+        when(queryPortfolioRepository.findMaxAllocationPerTrade()).thenReturn(maxAllocationPerTrade);
+        when(queryPortfolioRepository.findTotalPortfolioValue()).thenReturn(totalPortfolioValue);
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
 
         tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.BUY);
         tradeRecommendation.getStockNewsAnalysis().getStockPrediction()
@@ -74,10 +88,13 @@ class ProposeTradeServiceTest {
         assertThat(actual).isEqualTo(expected);
 
         verify(riskInference).predict(any(TradeRiskParameters.class));
+        verify(portfolioTradeRepository).save(any());
     }
 
     @Test
     void given_sell_trade_when_propose_then_return_trade() {
+
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
 
         tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
         tradeRecommendation.getStockNewsAnalysis()
@@ -92,8 +109,8 @@ class ProposeTradeServiceTest {
 
         int expectedQuantity = 500;
 
-        when(repository.findMaxSellLimit(anyString())).thenReturn(maxSellLimit);
-        when(repository.findBaseSellQuantity(anyString())).thenReturn(baseSellQuantity);
+        when(queryPortfolioRepository.findMaxSellLimit(anyString())).thenReturn(maxSellLimit);
+        when(queryPortfolioRepository.findBaseSellQuantity(anyString())).thenReturn(baseSellQuantity);
 
         var expected = PortfolioTradeProposal.builder()
                 .id(tradeRecommendation.getId())
@@ -105,6 +122,7 @@ class ProposeTradeServiceTest {
 
         assertThat(actual).isEqualTo(expected);
         verify(riskInference).predict(any(TradeRiskParameters.class));
+        verify(portfolioTradeRepository).save(any());
     }
 
 

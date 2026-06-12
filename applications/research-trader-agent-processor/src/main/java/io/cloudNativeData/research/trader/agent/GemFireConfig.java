@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader.agent;
 
 import io.cloudNativeData.trading.StockDailyPrice;
+import io.cloudNativeData.trading.TradeRecommendation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.client.ClientCache;
@@ -24,6 +25,18 @@ public class GemFireConfig {
         regionBean.setDataPolicy(DataPolicy.EMPTY);
         return regionBean;
     }
+
+    @Bean("TradeRecommendation")
+    ClientRegionFactoryBean<String, TradeRecommendation> tradeRecommendation(ClientCache cache) {
+        var regionBean = new ClientRegionFactoryBean<String, TradeRecommendation>();
+        regionBean.setCache(cache);
+        regionBean.setName("TradeRecommendation");
+        regionBean.setDataPolicy(DataPolicy.EMPTY);
+        return regionBean;
+    }
+
+
+
 
 
 }

@@ -2,7 +2,7 @@ package io.cloudNativeData.portfolio.agent.repository;
 
 import java.math.BigDecimal;
 
-public interface PortfolioRepository {
+public interface QueryPortfolioRepository {
 
     BigDecimal findTotalPortfolioValue();
 

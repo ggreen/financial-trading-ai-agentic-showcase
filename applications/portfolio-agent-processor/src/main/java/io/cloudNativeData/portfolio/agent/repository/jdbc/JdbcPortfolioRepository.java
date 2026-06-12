@@ -1,6 +1,6 @@
 package io.cloudNativeData.portfolio.agent.repository.jdbc;
 
-import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
+import io.cloudNativeData.portfolio.agent.repository.QueryPortfolioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcPortfolioRepository implements PortfolioRepository {
+public class JdbcPortfolioRepository implements QueryPortfolioRepository {
 
     private final JdbcTemplate jdbcTemplate;
     /*

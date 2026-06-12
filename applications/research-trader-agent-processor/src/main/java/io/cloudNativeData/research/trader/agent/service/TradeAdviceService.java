@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
+import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.TradeParameters;
@@ -16,6 +17,8 @@ public class TradeAdviceService {
 
     private final TradePredictionInference inference;
     private final StockPricingExecution repository;
+    private final TradeRecommendationRepository tradeRecommendationRepository;
+
 
     public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
 
@@ -29,11 +32,14 @@ public class TradeAdviceService {
         var tradePrediction = inference.recommend(summary200);
 
         log.info("predication: {}", tradePrediction);
-        return TradeRecommendation
+        var tradeRecommendation = TradeRecommendation
                 .builder()
                 .id(stockNewsAnalysis.getId())
                 .tradePrediction(tradePrediction)
                 .stockNewsAnalysis(stockNewsAnalysis)
                 .build();
+
+        tradeRecommendationRepository.save(tradeRecommendation);
+        return tradeRecommendation;
     }
 }

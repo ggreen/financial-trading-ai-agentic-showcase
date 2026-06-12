@@ -1,12 +1,15 @@
 package io.cloudNativeData.portfolio.agent.service;
 
 import io.cloudNativeData.portfolio.agent.ai.RiskInference;
-import io.cloudNativeData.portfolio.agent.repository.PortfolioRepository;
+import io.cloudNativeData.portfolio.agent.repository.PortfolioTradeRepository;
+import io.cloudNativeData.portfolio.agent.repository.QueryPortfolioRepository;
+import io.cloudNativeData.portfolio.agent.repository.entities.PortfolioTradeEntity;
 import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeRecommendation;
 import io.cloudNativeData.trading.risk.TradeRiskParameters;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,8 +18,10 @@ import java.math.RoundingMode;
 @Service
 @RequiredArgsConstructor
 public class ProposeTradeService {
-    private final PortfolioRepository repository;
+    private final QueryPortfolioRepository repository;
     private final RiskInference riskInference;
+    private final PortfolioTradeRepository tradeRepository;
+    private final Converter<PortfolioTradeProposal, PortfolioTradeEntity> portfolioTradeProposalToEntity;
 
     /**
      *
@@ -42,12 +47,29 @@ public class ProposeTradeService {
                         .build());
 
 
-        return PortfolioTradeProposal.builder()
+        var proposal = PortfolioTradeProposal.builder()
                 .quantity(quantity)
                 .tradeRecommendation(trade)
                 .id(trade.getId())
                 .riskPrediction(riskPrediction)
                 .build();
+
+        return saveProposal(proposal);
+
+    }
+
+    /**
+     *
+     * @param proposal the trade postal
+     * @return the saved proposal
+     */
+    private PortfolioTradeProposal saveProposal(PortfolioTradeProposal proposal) {
+
+        var entity = portfolioTradeProposalToEntity.convert(proposal);
+
+        this.tradeRepository.save(entity);
+
+        return proposal;
     }
 
     /*
