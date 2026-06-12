@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VMware Tanzu | Stock Trading Intelligence Platform</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tanzu: {
+                            bg: '#0F172A',         /* Core Deep Slate Background */
+                            sidebar: '#1E293B',    /* Structure Sidebar/Header */
+                            card: '#1E293B',       /* Elevated component blocks */
+                            border: '#334155',     /* Tanzu High-contrast grid lines */
+                            blue: '#0095D3',       /* Corporate Accent Blue */
+                            green: '#6DB33F',      /* Tanzu Brand Green (Bullish/Success) */
+                            gray: '#94A3B8'        /* Secondary metadata type */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="bg-tanzu-bg text-slate-100 min-h-screen flex flex-col">
+
+<div id="app" v-cloak class="flex flex-col min-h-screen">
+
+    <header class="bg-slate-900 border-b border-tanzu-border h-14 flex items-center justify-between px-6 z-20 shadow-md">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 text-white font-bold tracking-wide text-lg">
+                    <span class="bg-gradient-to-r from-tanzu-blue to-teal-500 p-1.5 rounded-md text-xs text-slate-900">
+                        <i class="fa-solid fa-cubes text-white text-base"></i>
+                    </span>
+                <span>VMware <span class="text-tanzu-blue font-light">Tanzu</span></span>
+                <span class="text-xs bg-tanzu-border px-2 py-0.5 rounded text-tanzu-gray uppercase tracking-widest ml-2 font-mono">v10.4</span>
+            </div>
+            <div class="h-6 w-px bg-tanzu-border hidden md:block"></div>
+            <span class="text-sm text-tanzu-gray hidden md:block font-medium">
+                    <i class="fa-solid fa-microservice mr-2 text-tanzu-blue"></i>Trades Stream Engine
+                </span>
+        </div>
+
+        <div class="flex items-center space-x-4 text-sm">
+            <div class="bg-tanzu-sidebar px-3 py-1 rounded border border-tanzu-border text-xs flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full" :class="isLive ? 'bg-tanzu-green animate-pulse' : 'bg-amber-500'"></span>
+                <span class="text-slate-300 font-mono text-[11px]">GET: :8066/trades/recommendations</span>
+            </div>
+            <button @click="fetchData" class="text-tanzu-gray hover:text-white transition" title="Force Sync">
+                <i class="fa-solid fa-arrow-rotate-right" :class="{'animate-spin': loading}"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-64 bg-slate-900 border-r border-tanzu-border flex flex-col justify-between hidden md:flex p-4">
+            <div class="space-y-6">
+                <div>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-tanzu-gray block mb-2 px-2">Data Clusters</span>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center space-x-3 bg-tanzu-blue/10 text-tanzu-blue px-3 py-2 rounded-md text-sm font-medium border-l-2 border-tanzu-blue">
+                            <i class="fa-solid fa-table-list w-5"></i>
+                            <span>Recommendations Grid</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 text-tanzu-gray hover:bg-tanzu-border/40 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
+                            <i class="fa-solid fa-tower-broadcast w-5"></i>
+                            <span>Sentiment Pipelines</span>
+                        </a>
+                    </nav>
+                </div>
+                <div>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-tanzu-gray block mb-2 px-2">Configuration</span>
+                    <div class="px-2 space-y-3">
+                        <label class="block text-xs text-tanzu-gray">Auto-Polling Interval</label>
+                        <select v-model="pollInterval" @change="resetPolling" class="w-full bg-tanzu-bg border border-tanzu-border rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-tanzu-blue font-mono">
+                            <option :value="5000">5 Seconds</option>
+                            <option :value="15000">15 Seconds</option>
+                            <option :value="30000">30 Seconds</option>
+                            <option :value="0">Disabled (Manual)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-tanzu-bg p-3 rounded border border-tanzu-border text-[11px] text-tanzu-gray space-y-1">
+                <div class="font-bold text-slate-400 mb-1">Telemetry Diagnostics</div>
+                <div class="flex justify-between"><span>Status:</span><span class="text-tanzu-green font-mono">CONNECTED</span></div>
+                <div class="flex justify-between"><span>Records Cache:</span><span class="text-white font-mono">{{ recommendations.length }} nodes</span></div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <div class="text-xs text-tanzu-gray space-x-2 flex items-center mb-1">
+                        <span>App Platform Hub</span> <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                        <span class="text-slate-300">Signal Intelligence Grid</span>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-white">Automated Trade Recommendations Matrix</h1>
+                </div>
+
+                <div class="flex items-center space-x-2 bg-tanzu-sidebar border border-tanzu-border p-1.5 rounded-lg">
+                    <span class="text-xs font-medium px-2 text-tanzu-gray">Simulate Live API Engine:</span>
+                    <button @click="toggleMock" :class="usingMock ? 'bg-tanzu-blue text-white' : 'bg-tanzu-bg text-tanzu-gray'" class="text-xs font-semibold px-3 py-1 rounded transition shadow-sm">
+                        {{ usingMock ? 'ACTIVE (Demo Data)' : 'OFFLINE' }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
+                    <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Total Active Rows</div>
+                    <div class="text-2xl font-bold text-white font-mono">{{ recommendations.length }}</div>
+                </div>
+                <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
+                    <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Dominant Sentiment</div>
+                    <div class="text-2xl font-bold text-tanzu-green font-mono">BULLISH</div>
+                </div>
+                <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
+                    <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Mean Target Confidence</div>
+                    <div class="text-2xl font-bold text-white font-mono">95.0%</div>
+                </div>
+                <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
+                    <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Unresolved Vectors</div>
+                    <div class="text-2xl font-bold text-amber-500 font-mono">{{ nullActionCount }} <span class="text-xs text-tanzu-gray font-sans font-normal">(Null Actions)</span></div>
+                </div>
+            </div>
+
+            <div class="bg-tanzu-sidebar border border-tanzu-border rounded-lg shadow-xl overflow-hidden">
+                <div class="p-4 bg-slate-900/60 border-b border-tanzu-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="text-sm font-bold text-white flex items-center"><i class="fa-solid fa-database text-tanzu-blue mr-2"></i> Real-time Ingestion Stream Layout</div>
+                    <div class="text-xs text-tanzu-gray italic" v-if="lastUpdated">Last synced: <span class="font-mono text-slate-300">{{ lastUpdated }}</span></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                        <tr class="border-b border-tanzu-border bg-tanzu-bg/50 text-[11px] font-bold uppercase tracking-wider text-tanzu-gray">
+                            <th class="py-3 px-4">Ticker Target</th>
+                            <th class="py-3 px-4">Cognitive NLP Summary</th>
+                            <th class="py-3 px-4 text-center">Sentiment Profile</th>
+                            <th class="py-3 px-4 text-center">Confidence Vector</th>
+                            <th class="py-3 px-4">Execution Advice</th>
+                            <th class="py-3 px-4">Target Entry Price</th>
+                            <th class="py-3 px-4 text-right">Raw HTML Payload</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-tanzu-border/60 text-sm">
+                        <tr v-for="item in recommendations" :key="item.id" class="hover:bg-slate-800/40 transition">
+
+                            <td class="py-3.5 px-4 font-mono font-bold text-white">
+                                        <span class="bg-tanzu-blue/10 text-tanzu-blue px-2.5 py-1 rounded border border-tanzu-blue/30 tracking-wide text-xs">
+                                            {{ item.id }}
+                                        </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 max-w-sm text-xs text-slate-200 leading-normal">
+                                {{ item.stockNewsAnalysis?.stockPrediction?.newsSummary || 'N/A' }}
+                            </td>
+
+                            <td class="py-3.5 px-4 text-center">
+                                        <span :class="item.stockNewsAnalysis?.stockPrediction?.marketSentiment === 'BULLISH' ? 'bg-tanzu-green/10 text-tanzu-green border-tanzu-green/30' : 'bg-red-500/10 text-red-400 border-red-500/30'" class="text-[10px] font-bold px-2 py-0.5 rounded border">
+                                            {{ item.stockNewsAnalysis?.stockPrediction?.marketSentiment || 'UNKNOWN' }}
+                                        </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 text-center font-mono text-xs">
+                                <div class="font-bold text-white">{{ ((item.tradePrediction?.tradeConfidence || 0) * 100).toFixed(1) }}%</div>
+                                <div class="text-[10px] text-tanzu-gray">Model Config</div>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                        <span v-if="item.tradePrediction?.adviceAction" class="bg-purple-500/20 text-purple-300 text-xs px-2 py-1 rounded border border-purple-500/40 font-mono">
+                                            {{ item.tradePrediction.adviceAction }}
+                                        </span>
+                                <span v-else class="text-amber-500 text-xs font-medium flex items-center space-x-1.5">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            <span class="font-mono bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 text-[11px]">NULL_SUSPEND</span>
+                                        </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 font-mono text-xs">
+                                        <span v-if="item.tradePrediction?.price" class="text-white font-bold">
+                                            ${{ item.tradePrediction.price.toFixed(2) }}
+                                        </span>
+                                <span v-else class="text-slate-500 italic">
+                                            --
+                                        </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 text-right">
+                                <div class="inline-block text-left bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border font-mono text-[11px] text-amber-400 max-w-[160px] truncate" :title="item.stockNewsAnalysis?.rawNews">
+                                    <i class="fa-solid fa-terminal text-tanzu-gray text-[9px] mr-1"></i>
+                                    <code>{{ item.stockNewsAnalysis?.rawNews }}</code>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr v-if="recommendations.length === 0">
+                            <td colspan="7" class="text-center py-12 text-tanzu-gray bg-tanzu-bg/20">
+                                <i class="fa-solid fa-circle-nodes text-3xl mb-3 block text-tanzu-border"></i>
+                                <p class="text-sm">No streaming records resolved from endpoint.</p>
+                                <p class="text-xs text-slate-500 mt-1 font-mono">Verify localhost:8066 connectivity or trigger Demo Mode.</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div v-if="error" class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start space-x-3">
+                <i class="fa-solid fa-circle-exclamation text-red-400 text-base mt-0.5"></i>
+                <div>
+                    <h4 class="text-xs font-bold text-red-400 uppercase tracking-wider mb-0.5">XHR Network Connectivity Interrupted</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Could not communicate with the local engine on <code class="bg-slate-900 px-1 rounded text-amber-400 font-mono">http://localhost:8066/trades/recommendations</code>. Ensure your back-end application service is running and CORS allows incoming browser requests. Turn on **Simulate Live API Engine** at the top right to view layout functionality.
+                    </p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <footer class="bg-slate-900 border-t border-tanzu-border h-10 flex items-center justify-between px-6 text-xs text-tanzu-gray z-20">
+        <div>&copy; 2026 Broadcom / VMware Tanzu Application Ecosystems Frameworks.</div>
+        <div class="flex space-x-4">
+            <a href="#" class="hover:text-slate-300 transition">API Sandbox Documentation</a>
+            <a href="#" class="hover:text-slate-300 transition">Tanzu Security Guardrails</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+    const { createApp, ref, onMounted, onBeforeUnmount, computed } = Vue;
+
+    createApp({
+        setup() {
+            const recommendations = ref([]);
+            const loading = ref(false);
+            const error = ref(null);
+            const isLive = ref(false);
+            const pollInterval = ref(5000);
+            const usingMock = ref(true); // Default to true so components render beautifully out-of-the-box
+            const lastUpdated = ref('');
+            let timer = null;
+
+            // Static JSON matching your endpoint response structure
+            const payloadMockData = [
+                {
+                    "id": "NA",
+                    "stockNewsAnalysis": {
+                        "id": "NA",
+                        "rawNews": "<p>Not available</p>",
+                        "stockPrediction": {
+                            "marketSentiment": "NEUTRAL",
+                            "newsSummary": "Not available.",
+                            "sentimentConfidence": 1.00
+                        },
+                        "ticker": "GOG"
+                    },
+                    "tradePrediction": {
+                        "adviceAction": null,
+                        "price": null,
+                        "tradeConfidence": 0.95
+                    }
+                }
+            ];
+
+            const updateTimestamp = () => {
+                const now = new Date();
+                lastUpdated.value = now.toTimeString().split(' ')[0];
+            };
+
+            const fetchData = async () => {
+                loading.value = true;
+                error.value = null;
+
+                if (usingMock.value) {
+                    // Simulate API Engine local resolution delay
+                    setTimeout(() => {
+                        recommendations.value = payloadMockData;
+                        loading.value = false;
+                        isLive.value = true;
+                        updateTimestamp();
+                    }, 300);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('trades/recommendations', {
+                        method: 'GET',
+                        headers: { 'accept': '*/*' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
+                    // const data = await response.getReader();
+                    recommendations.value = await response.json();
+                    isLive.value = true;
+                    updateTimestamp();
+                } catch (err) {
+                    error.value = err.message;
+                    recommendations.value = [];
+                    isLive.value = false;
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            const toggleMock = () => {
+                usingMock.value = !usingMock.value;
+                fetchData();
+            };
+
+            const resetPolling = () => {
+                clearInterval(timer);
+                if (pollInterval.value > 0) {
+                    timer = setInterval(fetchData, pollInterval.value);
+                }
+            };
+
+            // Analytical Metrics Processing
+            const nullActionCount = computed(() => {
+                return recommendations.value.filter(item => !item.tradePrediction?.adviceAction).length;
+            });
+
+            onMounted(() => {
+                fetchData();
+                resetPolling();
+            });
+
+            onBeforeUnmount(() => {
+                clearInterval(timer);
+            });
+
+            return {
+                recommendations,
+                loading,
+                error,
+                isLive,
+                pollInterval,
+                usingMock,
+                lastUpdated,
+                nullActionCount,
+                fetchData,
+                toggleMock,
+                resetPolling
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
