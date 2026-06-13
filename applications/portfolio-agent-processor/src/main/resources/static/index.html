@@ -38,6 +38,17 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #00c4b4;
         }
+        /* Style select elements cleanly to match Tanzu theme */
+        select {
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
     </style>
 </head>
 <body>
@@ -55,13 +66,25 @@
             </div>
         </div>
 
-        <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-2 text-xs bg-[#17242d] px-3 py-1.5 rounded-full border border-gray-700">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
+        <div class="flex items-center space-x-4">
+            <div class="hidden md:flex items-center space-x-2 text-xs bg-[#17242d] px-3 py-1.5 rounded-full border border-gray-700">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
                 <span class="text-gray-300 font-mono text-[11px]">API: http://localhost:8067</span>
+            </div>
+
+            <div class="flex items-center space-x-2 bg-[#17242d] border border-gray-700 rounded px-2 py-1">
+                <label for="refreshRate" class="text-xs text-gray-400 font-medium whitespace-nowrap pl-1">
+                    <i class="fa-solid fa-clock-rotate-left mr-1 text-[#00c4b4]"></i> Auto Refresh:
+                </label>
+                <select id="refreshRate" v-model="refreshInterval" class="bg-transparent text-xs text-white focus:outline-none font-semibold cursor-pointer py-1 pr-8">
+                    <option value="0" class="bg-[#17242d]">Disabled</option>
+                    <option value="5000" class="bg-[#17242d]">5s</option>
+                    <option value="15000" class="bg-[#17242d]">15s</option>
+                    <option value="30000" class="bg-[#17242d]">30s</option>
+                </select>
             </div>
 
             <button @click="fetchProposals" class="text-sm bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded font-medium transition-colors flex items-center space-x-2 border border-gray-700">
@@ -104,7 +127,12 @@
         <div class="card-bg rounded-lg border border-gray-800 shadow-xl overflow-hidden">
             <div class="border-b border-gray-800 bg-[#121d25] px-6 py-4 flex justify-between items-center">
                 <h2 class="text-sm font-semibold tracking-wider uppercase text-gray-300">Active Recommendations Queue</h2>
-                <span class="text-xs font-mono text-gray-500">Connected via REST Endpoint</span>
+                <div class="flex items-center space-x-3">
+                    <span v-if="refreshInterval > 0" class="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded font-mono">
+                        Auto-sync Active ({{ refreshInterval / 1000 }}s)
+                    </span>
+                    <span class="text-xs font-mono text-gray-500">Connected via REST Endpoint</span>
+                </div>
             </div>
 
             <div v-if="loading && proposals.length === 0" class="p-12 text-center flex flex-col items-center justify-center space-y-3">
@@ -143,28 +171,28 @@
                         <td class="px-6 py-4 text-xs font-mono text-gray-500">#{{ trade.id }}</td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
-                                <span class="text-white font-semibold tracking-wide">{{ trade.ticker || trade.asset || 'N/A' }}</span>
+                                <span class="text-white font-semibold tracking-wide">{{ trade.tradeRecommendation.stockNewsAnalysis.ticker }}</span>
                                 <span class="text-[11px] text-gray-400 font-normal">{{ trade.assetName || 'Portfolio Security Asset' }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
                                     <span :class="isBuyAction(trade.action) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
                                           class="text-[11px] px-2.5 py-0.5 rounded font-mono uppercase font-bold tracking-wider">
-                                        {{ trade.action || 'BUY' }}
+                                        {{ trade.tradeRecommendation.tradePrediction.adviceAction || 'N/A' }}
                                     </span>
                         </td>
                         <td class="px-6 py-4 text-right font-mono text-sm text-gray-200">
                             {{ formatNumber(trade.quantity) }}
                         </td>
                         <td class="px-6 py-4 text-right font-mono text-sm text-white">
-                            ${{ formatPrice(trade.price || trade.targetPrice) }}
+                            ${{ formatPrice(trade.tradeRecommendation.tradePrediction.price || 0) }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center space-x-2">
                                 <div class="w-16 bg-gray-800 rounded-full h-1.5 overflow-hidden">
                                     <div class="h-1.5 rounded-full tanzu-gradient" :style="{ width: (trade.confidence || 85) + '%' }"></div>
                                 </div>
-                                <span class="text-xs text-gray-300 font-mono">{{ trade.confidence || 85 }}%</span>
+                                <span class="text-xs text-gray-300 font-mono">{{ trade.tradeRecommendation.tradePrediction.tradeConfidence || 0 }}%</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-right">
@@ -200,7 +228,7 @@
 </div>
 
 <script>
-    const { createApp, ref, onMounted } = Vue;
+    const { createApp, ref, onMounted, onBeforeUnmount, watch } = Vue;
 
     createApp({
         setup() {
@@ -209,6 +237,11 @@
             const loading = ref(false);
             const processingId = ref(null);
             const alert = ref(null);
+
+            // Auto Refresh variables (value configured in milliseconds)
+            // Defaulting option to 15000 (15s). Use '0' string/integer value for absolute manual control.
+            const refreshInterval = ref(15000);
+            let pollingTimer = null;
 
             const BASE_URL = '/portfolio/trade/proposals';
 
@@ -223,17 +256,41 @@
                     if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
 
                     const data = await response.json();
-                    // Handle scenario if backend wraps payload in an object properties or returns raw array
                     proposals.value = Array.isArray(data) ? data : (data.proposals || []);
                 } catch (error) {
                     console.error("Error fetching trading proposals:", error);
                     showAlert("Failed to connect to Tanzu Portfolio Microservice endpoint. Mocking sample data for preview.", "error");
-                    // Fallback sample data to demonstrate standard UI visualization if server is unreached
                     proposals.value = getMockData();
                 } finally {
                     loading.value = false;
                 }
             };
+
+            // Setup and Clear Cycle Engine for the Poller
+            const stopPolling = () => {
+                if (pollingTimer) {
+                    clearInterval(pollingTimer);
+                    pollingTimer = null;
+                }
+            };
+
+            const startPolling = () => {
+                stopPolling();
+                const intervalTime = parseInt(refreshInterval.value);
+                if (intervalTime > 0) {
+                    pollingTimer = setInterval(() => {
+                        // Prevent multi-fetch collision if an execution or manual action is occupying resources
+                        if (!loading.value) {
+                            fetchProposals();
+                        }
+                    }, intervalTime);
+                }
+            };
+
+            // Reactive Watcher: Adapts on-the-fly when user changes options in the dropdown selector
+            watch(refreshInterval, () => {
+                startPolling();
+            });
 
             // Accept Trade Proposal Action using HTTP PUT
             const acceptTrade = async (id) => {
@@ -246,7 +303,6 @@
 
                     if (response.ok) {
                         showAlert(`Trade Proposal #${id} successfully executed!`, "success");
-                        // Remove processed trade proposal reactively from UI view layout
                         proposals.value = proposals.value.filter(item => item.id !== id);
                     } else {
                         throw new Error(`Execution returned server code ${response.status}`);
@@ -254,7 +310,6 @@
                 } catch (error) {
                     console.error(`Error executing accept for proposal ${id}:`, error);
                     showAlert(`Executed action payload for Proposal #${id} (Simulated execution fallback success).`, "success");
-                    // Optimistic UI updates if testing independently without live cluster connectivity
                     proposals.value = proposals.value.filter(item => item.id !== id);
                 } finally {
                     processingId.value = null;
@@ -288,7 +343,7 @@
                 return price ? Number(price).toFixed(2) : '0.00';
             };
 
-            // Mock dataset mimicking the data structures expected by automated trader configurations
+            // Mock dataset
             const getMockData = () => [
                 { id: 1042, ticker: 'VMW', assetName: 'VMware Inc.', action: 'BUY', quantity: 250, targetPrice: 142.50, confidence: 94 },
                 { id: 1043, ticker: 'NVDA', assetName: 'NVIDIA Corporation', action: 'BUY', quantity: 85, targetPrice: 485.20, confidence: 89 },
@@ -296,9 +351,14 @@
                 { id: 1045, ticker: 'AMZN', assetName: 'Amazon.com Inc.', action: 'BUY', quantity: 120, targetPrice: 134.00, confidence: 65 }
             ];
 
-            // Initial fetch lifecycle hook
+            // Lifecycles
             onMounted(() => {
                 fetchProposals();
+                startPolling(); // Starts auto refresh at layout initialization
+            });
+
+            onBeforeUnmount(() => {
+                stopPolling(); // Garbage collection to ensure memory leak prevention
             });
 
             return {
@@ -306,6 +366,7 @@
                 loading,
                 processingId,
                 alert,
+                refreshInterval,
                 fetchProposals,
                 acceptTrade,
                 rejectTrade,
