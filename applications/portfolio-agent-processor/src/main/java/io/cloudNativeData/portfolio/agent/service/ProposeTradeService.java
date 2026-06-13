@@ -26,6 +26,7 @@ public class ProposeTradeService {
     private final PortfolioTradeRepository tradeRepository;
     private final Converter<PortfolioTradeProposal, PortfolioTradeEntity> portfolioTradeProposalToEntity;
 
+
     /**
      *
      * @param trade trade recommendation
