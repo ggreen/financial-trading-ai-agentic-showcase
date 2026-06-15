@@ -1,0 +1,92 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'io.cloudNativeData'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.named('bootJar') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "https://packages.broadcom.com/artifactory/gemfire/"
+        metadataSources {
+            mavenPom()
+            artifact()
+            ignoreGradleMetadataRedirection()
+        }
+        credentials {
+            credentials {
+                username System.getenv('BROADCOM_MAVEN_USERNAME')
+                password System.getenv('BROADCOM_GEMFIRE_MAVEN_PASSWORD')
+            }
+        }
+    }
+}
+
+// Defining your properties/extra variables
+ext {
+    set('springCloudVersion', "2025.1.1")
+    springBootForGemFireVersion = '2.0.0'
+    vmwareGemFireVersion = '10.2.0'
+}
+
+dependencies {
+    // Spring Cloud Bill of Materials (BOM) - replaces <dependencyManagement>
+    implementation platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+
+    // Project Dependencies with Explicit Versions
+    implementation "com.vmware.gemfire:spring-boot-4.0-gemfire-10.2:$springBootForGemFireVersion"
+    implementation "com.vmware.gemfire:gemfire-core:$vmwareGemFireVersion"
+
+
+    implementation 'com.github.nyla-solutions:nyla.solutions.core:2.5.2'
+
+    // Spring Boot & Cloud Starters (Versions managed by parent plugin/BOM)
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-batch-jdbc'
+    implementation 'org.springframework.cloud:spring-cloud-starter-task'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.liquibase:liquibase-core'
+
+    // Runtime Only
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+
+    // Lombok Configuration (Handles <optional>true</optional>)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing Dependencies
+    testCompileOnly 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation 'jakarta.activation:jakarta.activation-api'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+dependencies {
+    implementation project(':components:trading-domain')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
