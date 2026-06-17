@@ -26,6 +26,16 @@ public class GemFireConfig {
         return regionBean;
     }
 
+    //StockPrice
+    @Bean("StockPrice")
+    ClientRegionFactoryBean<String, StockDailyPrice> stockPrice(ClientCache cache) {
+        var regionBean = new ClientRegionFactoryBean<String, StockDailyPrice>();
+        regionBean.setCache(cache);
+        regionBean.setName("StockPrice");
+        regionBean.setDataPolicy(DataPolicy.EMPTY);
+        return regionBean;
+    }
+
     @Bean("TradeRecommendation")
     ClientRegionFactoryBean<String, TradeRecommendation> tradeRecommendation(ClientCache cache) {
         var regionBean = new ClientRegionFactoryBean<String, TradeRecommendation>();

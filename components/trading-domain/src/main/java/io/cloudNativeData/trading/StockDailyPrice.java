@@ -16,9 +16,6 @@ public class StockDailyPrice {
     private String id;
 
     private String ticker;
-    private BigDecimal openPrice;
-    private BigDecimal highPrice;
-    private BigDecimal lowPrice;
     private BigDecimal closePrice;
     private long volume;
     private LocalDate priceDate;
