@@ -1,0 +1,36 @@
+server:
+  port: 9999
+logging:
+  level:
+    # Enables detailed logging for routes, predicates, and filter lifecycles
+    org.springframework.cloud.gateway: TRACE
+
+    # Optional: Track the actual HTTP requests/responses flowing through the gateway
+    org.springframework.cloud.gateway.filter.ratelimit: TRACE
+
+    # Optional: See the underlying reactive Netty server routing and connections
+    reactor.netty.http.client: DEBUG
+spring:
+  application:
+    name: stock-price-api
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+          - id: self_bound_stock_route
+            uri: forward:///v1/stockprice
+            predicates:
+              - Path=/v1/stockprice/limit
+            filters:
+              # Enforce 1 request per 3600 seconds (1 hour)
+              - name: RequestRateLimiter
+                args:
+                  redis-rate-limiter.replenishRate: 1
+                  redis-rate-limiter.burstCapacity: 3600
+                  redis-rate-limiter.requestedTokens: 3600
+                  key-resolver: "#{@ipKeyResolver}"

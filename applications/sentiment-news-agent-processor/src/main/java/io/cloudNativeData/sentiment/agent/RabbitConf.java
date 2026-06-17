@@ -14,7 +14,7 @@ import  org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 @Configuration
 public class RabbitConf {
 
-    @Value("${spring.cloud.stream.bindings.input.destination:stocks.news}")
+    @Value("${spring.cloud.stream.bindings.output.destination}")
     private String stockNewsAnalysisExchange;
 
 
