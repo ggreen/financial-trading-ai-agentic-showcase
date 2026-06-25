@@ -30,6 +30,7 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-gemfire'
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.github.nyla-solutions:nyla.solutions.core:2.5.1'
 	implementation 'org.springframework.ai:spring-ai-tika-document-reader'
