@@ -6,27 +6,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("portfolio")
+@RequestMapping("portfolio/trade/")
 @RequiredArgsConstructor
 public class PortfolioController {
 
     private final ProposeTradeService service;
 
-    @GetMapping("trade/proposals")
+    @GetMapping("proposals")
     public Iterable<PortfolioTradeProposal> getTradeProposals() {
         return service.findAllTradeProposals();
 
     }
 
     @PutMapping
-    @RequestMapping("trace/accept")
-    public void acceptTradeProposal(@RequestParam String id) {
+    @RequestMapping("accept/{id}")
+    public void acceptTradeProposal(@PathVariable String id) {
         service.acceptTradeProposalById(id);
     }
 
     @PutMapping
-    @RequestMapping("trace/reject")
-    public void rejectTradeProposal(@RequestParam String id) {
+    @RequestMapping("reject/{id}")
+    public void rejectTradeProposal(@PathVariable String id) {
 
         service.rejectTradeProposalById(id);
 
