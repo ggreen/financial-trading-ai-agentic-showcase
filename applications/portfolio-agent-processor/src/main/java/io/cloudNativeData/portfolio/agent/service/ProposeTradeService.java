@@ -39,8 +39,7 @@ public class ProposeTradeService {
         log.info("Proposing trade action: {}", tradeAction);
 
         PortfolioTradeProposal proposal;
-        if(tradeAction == null)
-        {
+        if (tradeAction == null) {
             log.error("Proposing trade action is null, will not process, because a proposal is invalid");
             proposal = PortfolioTradeProposal.builder()
                     .id(trade.getId())
@@ -48,8 +47,7 @@ public class ProposeTradeService {
                     .proposalStatus(ProposalStatus.Invalid)
                     .build();
 
-        }
-        else{
+        } else {
 
             var quantity =
                     switch (tradeAction) {
@@ -74,7 +72,7 @@ public class ProposeTradeService {
                     .tradeRecommendation(trade)
                     .id(trade.getId())
                     .riskPrediction(riskPrediction)
-                    .proposalStatus(ProposalStatus.Valid)
+                    .proposalStatus(ProposalStatus.Open)
                     .build();
         }
 
@@ -123,7 +121,7 @@ public class ProposeTradeService {
         }
 
         // 3. If the outlook is Bearish, calculate sell quantity based on risk factors
-        if ( MarketSentiment.BEARISH.equals(bullOrBearish)) {
+        if (MarketSentiment.BEARISH.equals(bullOrBearish)) {
             int baseSellQuantity = repository.findBaseSellQuantity(ticker); // Define your baseline share block size
 
             // Extract confidence or risk multiplier if available in tradePrediction
@@ -167,5 +165,50 @@ public class ProposeTradeService {
 
         // 5. Return as a whole integer (rounding down to be safe)
         return targetQuantity.intValue();
+    }
+
+    public Iterable<PortfolioTradeProposal> findAllTradeProposals() {
+        return this.tradeRepository.findAllTradeProposals();
+    }
+
+    public void acceptTradeProposalById(String id) {
+
+        this.changeProposalStatusTradeProposalById(id, ProposalStatus.Accepted);
+    }
+
+    public void rejectTradeProposalById(String id) {
+        this.changeProposalStatusTradeProposalById(id, ProposalStatus.Rejected);
+
+    }
+
+    private void changeProposalStatusTradeProposalById(String id, ProposalStatus proposalStatus) {
+
+        // Guard clause for the input parameter
+        if (id == null) {
+            log.error("Cannot changed trade proposal because the provided ID is null.");
+            return;
+        }
+
+        log.info("Accepting trade proposal with ID: {}", id);
+
+        var optional = tradeRepository.findById(id);
+
+        if (optional.isEmpty()) {
+            log.error("Trade proposal entity with ID {} does exist", id);
+            return;
+        }
+        var entity = optional.get();
+
+        // Safely extract the proposal and its status using Optional to prevent NPEs
+        var proposal = entity.getTradeProposal();
+        if (proposal == null) {
+            log.error("Trade proposal entity with ID {} exists, but contains a null TradeProposal object.", id);
+            return;
+        }
+
+        proposal.setProposalStatus(proposalStatus);
+
+        tradeRepository.save(entity);
+        log.info("Trade proposal {} successfully accepted.", id);
     }
 }

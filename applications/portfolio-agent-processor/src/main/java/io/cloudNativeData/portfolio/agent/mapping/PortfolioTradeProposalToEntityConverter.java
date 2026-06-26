@@ -11,7 +11,7 @@ public class PortfolioTradeProposalToEntityConverter implements Converter<Portfo
     @Override
     public PortfolioTradeEntity convert(@NonNull PortfolioTradeProposal source) {
         return PortfolioTradeEntity.builder()
-                .id(source.id())
+                .id(source.getId())
                 .tradeProposal(source)
                 .build();
     }

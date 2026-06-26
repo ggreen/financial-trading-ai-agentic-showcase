@@ -16,6 +16,8 @@ import org.springframework.core.convert.converter.Converter;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +40,9 @@ class ProposeTradeServiceTest {
 
     @Mock
     private Converter<PortfolioTradeProposal, PortfolioTradeEntity> converter;
+
+
+    private final PortfolioTradeProposal portfolioTradeProposal = JavaBeanGeneratorCreator.of(PortfolioTradeProposal.class).create();
 
     private TradeRecommendation tradeRecommendation;
 
@@ -77,7 +82,7 @@ class ProposeTradeServiceTest {
                 .id(tradeRecommendation.getId())
                 .tradeRecommendation(tradeRecommendation)
                 .quantity(expectedQuantity)
-                .proposalStatus(ProposalStatus.Valid)
+                .proposalStatus(ProposalStatus.Open)
                 .build();
 
         var actual = subject.propose(tradeRecommendation);
@@ -112,7 +117,7 @@ class ProposeTradeServiceTest {
         var expected = PortfolioTradeProposal.builder()
                 .id(tradeRecommendation.getId())
                 .tradeRecommendation(tradeRecommendation)
-                .proposalStatus(ProposalStatus.Valid)
+                .proposalStatus(ProposalStatus.Open)
                 .quantity(expectedQuantity)
                 .build();
 
@@ -167,10 +172,101 @@ class ProposeTradeServiceTest {
     @Test
     void json() {
 
-        JsonMapper jsonMapper = new JsonMapper();
+        var jsonMapper = new JsonMapper();
 
         var json = jsonMapper.writeValueAsString(tradeRecommendation);
 
         System.out.println(json);
+    }
+
+    @Test
+    void findAllTradeProposals() {
+        Iterable<PortfolioTradeProposal> expected = List.of(this.portfolioTradeProposal);
+        when(this.portfolioTradeRepository.findAllTradeProposals()).thenReturn(expected);
+
+        var actual = subject.findAllTradeProposals();
+        assertThat(actual).isEqualTo(expected);
+
+    }
+
+    @Test
+    void acceptTradeProposalById() {
+
+        when(portfolioTradeRepository.findById(anyString())).thenReturn(Optional.of(this.portfolioTradeEntity));
+
+        subject.acceptTradeProposalById(tradeRecommendation.getId());
+
+        verify(portfolioTradeRepository).save(any());
+    }
+
+    @Test
+    void acceptTradeProposalById_WhenIdIsNull_ShouldReturnImmediately() {
+        // Act
+        subject.acceptTradeProposalById(null);
+
+        // Assert
+        verifyNoInteractions(portfolioTradeRepository);
+    }
+
+    @Test
+    void acceptTradeProposalById_WhenProposalNotFound_ShouldLogErrorAndReturn() {
+        // Arrange
+        String tradeId = "invalid-id";
+        when(portfolioTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
+
+        // Act
+        subject.acceptTradeProposalById(tradeId);
+
+        // Assert
+        verify(portfolioTradeRepository, times(1)).findById(tradeId);
+        verify(portfolioTradeRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptTradeProposalById_WhenTradeProposalIsNull_ShouldLogErrorAndReturn() {
+        // Arrange
+        String tradeId = "trade-123";
+        PortfolioTradeEntity mockEntity = mock(PortfolioTradeEntity.class);
+
+        when(portfolioTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockEntity));
+        when(mockEntity.getTradeProposal()).thenReturn(null);
+
+        // Act
+        subject.acceptTradeProposalById(tradeId);
+
+        // Assert
+        verify(portfolioTradeRepository, times(1)).findById(tradeId);
+        verify(portfolioTradeRepository, never()).save(any());
+    }
+
+    @Test
+    void acceptTradeProposalById_WhenValid_ShouldUpdateStatusAndSave() {
+        // Arrange
+        String tradeId = "trade-123";
+        PortfolioTradeEntity mockEntity = mock(PortfolioTradeEntity.class);
+        PortfolioTradeProposal mockProposal = mock(PortfolioTradeProposal.class);
+
+        when(portfolioTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockEntity));
+        when(mockEntity.getTradeProposal()).thenReturn(mockProposal);
+
+        // Act
+        subject.acceptTradeProposalById(tradeId);
+
+        // Assert
+        verify(portfolioTradeRepository, times(1)).findById(tradeId);
+        verify(mockProposal, times(1)).setProposalStatus(ProposalStatus.Accepted);
+        verify(portfolioTradeRepository, times(1)).save(mockEntity);
+    }
+
+
+
+    @Test
+    void rejectTradeProposalById() {
+
+        when(portfolioTradeRepository.findById(anyString())).thenReturn(Optional.of(this.portfolioTradeEntity));
+
+        subject.rejectTradeProposalById(tradeRecommendation.getId());
+
+        verify(portfolioTradeRepository).save(any());
     }
 }

@@ -1,22 +1,34 @@
 package io.cloudNativeData.portfolio.agent.controller;
 
-import io.cloudNativeData.portfolio.agent.repository.PortfolioTradeRepository;
+import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("portfolio")
 @RequiredArgsConstructor
 public class PortfolioController {
 
-    private final PortfolioTradeRepository repository;
+    private final ProposeTradeService service;
 
     @GetMapping("trade/proposals")
     public Iterable<PortfolioTradeProposal> getTradeProposals() {
-        return repository.findAllTradeProposals();
+        return service.findAllTradeProposals();
+
+    }
+
+    @PutMapping
+    @RequestMapping("trace/accept")
+    public void acceptTradeProposal(@RequestParam String id) {
+        service.acceptTradeProposalById(id);
+    }
+
+    @PutMapping
+    @RequestMapping("trace/reject")
+    public void rejectTradeProposal(@RequestParam String id) {
+
+        service.rejectTradeProposalById(id);
 
     }
 }

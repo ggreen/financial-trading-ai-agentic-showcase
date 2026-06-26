@@ -16,7 +16,7 @@ class PortfolioTradeProposalToEntityConverterTest {
 
     @Test
     void convert() {
-        var expected = PortfolioTradeEntity.builder().id(proposal.id())
+        var expected = PortfolioTradeEntity.builder().id(proposal.getId())
                 .tradeProposal(proposal)
                 .build();
 

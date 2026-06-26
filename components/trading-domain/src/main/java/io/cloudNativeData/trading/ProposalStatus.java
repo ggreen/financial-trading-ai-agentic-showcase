@@ -2,5 +2,7 @@ package io.cloudNativeData.trading;
 
 public enum ProposalStatus {
     Invalid,
-    Valid
+    Open,
+    Accepted,
+    Rejected
 }
