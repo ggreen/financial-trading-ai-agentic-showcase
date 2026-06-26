@@ -1,5 +1,5 @@
 podman run \
-    -it \
+    -it --name postgresml \
     --rm \
     -v postgresml_data:/var/lib/postgresql \
     -p 5432:5432 \

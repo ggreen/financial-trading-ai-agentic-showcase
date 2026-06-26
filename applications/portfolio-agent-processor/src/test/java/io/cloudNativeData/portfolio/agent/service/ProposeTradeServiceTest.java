@@ -269,4 +269,115 @@ class ProposeTradeServiceTest {
 
         verify(portfolioTradeRepository).save(any());
     }
+
+    //***************
+
+    @Test
+    void given_buy_trade_with_zero_or_negative_price_when_propose_then_quantity_is_zero() {
+        // Arrange
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.BUY);
+        tradeRecommendation.getTradePrediction().setPrice(BigDecimal.ZERO);
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
+
+        // Act
+        var actual = subject.propose(tradeRecommendation);
+
+        // Assert
+        assertThat(actual.getQuantity()).isZero();
+        verify(riskInference).predict(any(TradeRiskParameters.class));
+        verify(portfolioTradeRepository).save(any());
+    }
+
+    // ==========================================
+    // ADDITIONAL TESTS FOR SELL QUANTITY
+    // ==========================================
+
+    @Test
+    void given_sell_trade_with_null_prediction_data_when_propose_then_quantity_is_zero() {
+        // Arrange
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
+        tradeRecommendation.getStockNewsAnalysis().setStockPrediction(null);
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
+
+        // Act
+        var actual = subject.propose(tradeRecommendation);
+
+        // Assert
+        assertThat(actual.getQuantity()).isZero();
+    }
+
+    @Test
+    void given_sell_trade_and_bullish_sentiment_when_propose_then_quantity_is_zero() {
+        // Arrange
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
+        tradeRecommendation.getStockNewsAnalysis().getStockPrediction()
+                .setMarketSentiment(MarketSentiment.BULLISH);
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
+
+        // Act
+        var actual = subject.propose(tradeRecommendation);
+
+        // Assert
+        assertThat(actual.getQuantity()).isZero();
+    }
+
+    @Test
+    void given_sell_trade_bearish_when_final_quantity_less_than_max_limit_then_return_calculated_quantity() {
+        // Arrange
+        when(converter.convert(any())).thenReturn(portfolioTradeEntity);
+
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
+        tradeRecommendation.getStockNewsAnalysis().getStockPrediction()
+                .setMarketSentiment(MarketSentiment.BEARISH);
+        tradeRecommendation.getTradePrediction().setTradeConfidence(0.5); // 50% confidence
+
+        String ticker = tradeRecommendation.getStockNewsAnalysis().getTicker();
+        when(queryPortfolioRepository.findBaseSellQuantity(ticker)).thenReturn(100);
+        when(queryPortfolioRepository.findMaxSellLimit(ticker)).thenReturn(500);
+
+        // expected final quantity: 100 * 0.5 = 50 (which is less than max limit 500)
+        int expectedQuantity = 50;
+
+        // Act
+        var actual = subject.propose(tradeRecommendation);
+
+        // Assert
+        assertThat(actual.getQuantity()).isEqualTo(expectedQuantity);
+    }
+
+    // ==========================================
+    // ADDITIONAL TESTS FOR REJECT PROPOSAL
+    // ==========================================
+
+    @Test
+    void rejectTradeProposalById_WhenValid_ShouldUpdateStatusToRejectedAndSave() {
+        // Arrange
+        String tradeId = "trade-456";
+        PortfolioTradeEntity mockEntity = mock(PortfolioTradeEntity.class);
+        PortfolioTradeProposal mockProposal = mock(PortfolioTradeProposal.class);
+
+        when(portfolioTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockEntity));
+        when(mockEntity.getTradeProposal()).thenReturn(mockProposal);
+
+        // Act
+        subject.rejectTradeProposalById(tradeId);
+
+        // Assert
+        verify(portfolioTradeRepository, times(1)).findById(tradeId);
+        verify(mockProposal, times(1)).setProposalStatus(ProposalStatus.Rejected);
+        verify(portfolioTradeRepository, times(1)).save(mockEntity);
+    }
+
+
+    @Test
+    void determineBuy_when_price_isnull_return_0() {
+
+
+        TradeRecommendation advice = TradeRecommendation.builder()
+                .build();
+
+        var actual = subject.determineBuyQuantity(advice);
+
+        assertThat(actual).isEqualTo(0);
+    }
 }

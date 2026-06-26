@@ -57,12 +57,16 @@ public class ProposeTradeService {
                     };
 
             //Calculate risk
+            var stockNewsAnalysis = trade.getStockNewsAnalysis();
+            var stockPrediction = (stockNewsAnalysis != null) ? stockNewsAnalysis.getStockPrediction() : null;
+            var tradePrediction = trade.getTradePrediction();
+
             var riskPrediction = riskInference.predict(
                     TradeRiskParameters.builder()
-                            .stockPrediction(trade.getStockNewsAnalysis().getStockPrediction())
-                            .tradeAction(trade.getTradePrediction().getAdviceAction())
-                            .newsSummary(trade.getStockNewsAnalysis().getStockPrediction().getNewsSummary())
-                            .ticker(trade.getStockNewsAnalysis().getTicker())
+                            .stockPrediction(stockPrediction)
+                            .tradeAction(tradePrediction != null ? tradePrediction.getAdviceAction() : null)
+                            .newsSummary(stockPrediction != null ? stockPrediction.getNewsSummary() : null)
+                            .ticker(stockNewsAnalysis != null ? stockNewsAnalysis.getTicker() : null)
                             .quantity(quantity)
                             .build());
 
@@ -144,8 +148,15 @@ public class ProposeTradeService {
 
     public int determineBuyQuantity(TradeRecommendation advice) {
 
+        // 1. Guard against null advice or missing trade prediction
+        if (advice == null || advice.getTradePrediction() == null ) {
+            return 0;
+        }
+
         var stockMarketPrice = advice.getTradePrediction().getPrice();
-        if (stockMarketPrice.compareTo(BigDecimal.ZERO) <= 0) {
+
+        // 2. Safe to compare now
+        if (stockMarketPrice == null || stockMarketPrice.compareTo(BigDecimal.ZERO) <= 0) {
             return 0;
         }
 
