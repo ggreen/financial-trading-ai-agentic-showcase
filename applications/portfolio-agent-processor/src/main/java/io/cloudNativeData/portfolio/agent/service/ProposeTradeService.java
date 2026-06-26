@@ -178,8 +178,8 @@ public class ProposeTradeService {
         return targetQuantity.intValue();
     }
 
-    public Iterable<PortfolioTradeProposal> findAllTradeProposals() {
-        return this.tradeRepository.findAllTradeProposals();
+    public Iterable<PortfolioTradeProposal> findActiveTradeProposals() {
+        return this.tradeRepository.findNonRejectTradeProposals();
     }
 
     public void acceptTradeProposalById(String id) {

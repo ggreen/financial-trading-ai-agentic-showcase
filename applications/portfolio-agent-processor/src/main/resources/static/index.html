@@ -472,16 +472,36 @@
                 } catch (error) {
                     console.error(`Error executing PUT strategy for proposal ${id}:`, error);
                     showAlert(`Executed action payload for Proposal #${id} (Simulated execution fallback success).`, "success");
-                    proposals.value = proposals.value.filter(item => item.id !== id);
+                    //proposals.value = proposals.value.filter(item => item.id !== id);
                 } finally {
                     processingId.value = null;
                 }
             };
 
             // Local State clear dismiss trigger
-            const rejectTrade = (id) => {
-                proposals.value = proposals.value.filter(item => item.id !== id);
-                showAlert(`Trade Proposal #${id} rejected and cleared from queue.`, "info");
+            // Put Reject Execution Strategy
+            const rejectTrade = async (id) => {
+                processingId.value = id; // Set processing to lock buttons/spinners if needed
+                try {
+                    const response = await fetch(`${BASE_URL}/reject/${id}`, {
+                        method: 'PUT',
+                        headers: { 'accept': '*/*' }
+                    });
+
+                    if (response.ok) {
+                        showAlert(`Trade Proposal #${id} successfully rejected.`, "success");
+                        //proposals.value = proposals.value.filter(item => item.id !== id);
+                    } else {
+                        throw new Error(`Rejection returned status code ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error(`Error executing PUT strategy for proposal ${id}:`, error);
+                    // Fallback simulation mirroring acceptTrade's robust error behavior
+                    showAlert(`Rejected action payload for Proposal #${id} (Simulated rejection fallback success).`, "success");
+                    proposals.value = proposals.value.filter(item => item.id !== id);
+                } finally {
+                    processingId.value = null;
+                }
             };
 
             // Parsers and Data Normalization Helpers

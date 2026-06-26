@@ -180,11 +180,11 @@ class ProposeTradeServiceTest {
     }
 
     @Test
-    void findAllTradeProposals() {
+    void findActiveTradeProposals() {
         Iterable<PortfolioTradeProposal> expected = List.of(this.portfolioTradeProposal);
-        when(this.portfolioTradeRepository.findAllTradeProposals()).thenReturn(expected);
+        when(this.portfolioTradeRepository.findNonRejectTradeProposals()).thenReturn(expected);
 
-        var actual = subject.findAllTradeProposals();
+        var actual = subject.findActiveTradeProposals();
         assertThat(actual).isEqualTo(expected);
 
     }

@@ -13,8 +13,8 @@ public class PortfolioController {
     private final ProposeTradeService service;
 
     @GetMapping("proposals")
-    public Iterable<PortfolioTradeProposal> getTradeProposals() {
-        return service.findAllTradeProposals();
+    public Iterable<PortfolioTradeProposal> getTradeActiveProposals() {
+        return service.findActiveTradeProposals();
 
     }
 

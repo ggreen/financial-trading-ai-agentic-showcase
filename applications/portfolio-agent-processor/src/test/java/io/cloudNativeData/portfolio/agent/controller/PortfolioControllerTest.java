@@ -1,6 +1,5 @@
 package io.cloudNativeData.portfolio.agent.controller;
 
-import io.cloudNativeData.portfolio.agent.repository.PortfolioTradeRepository;
 import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
@@ -37,9 +36,9 @@ class PortfolioControllerTest {
     void selectPortfolios() {
         var expected  = List.of(proposal);
 
-        when(repository.findAllTradeProposals()).thenReturn(expected);
+        when(repository.findActiveTradeProposals()).thenReturn(expected);
 
-        var actual = subject.getTradeProposals();
+        var actual = subject.getTradeActiveProposals();
 
         assertThat(actual).isEqualTo(expected);
     }
