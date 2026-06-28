@@ -20,8 +20,7 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TradeAdviceServiceTest {
@@ -46,7 +45,6 @@ class TradeAdviceServiceTest {
     @Mock
     private Converter<StockPriceDto, StockDailyPrice> dtoToPriceConverter;
 
-    private final TradePrediction prediction = JavaBeanGeneratorCreator.of(TradePrediction.class).create();
     private final StockPriceDto dto = JavaBeanGeneratorCreator.of(StockPriceDto.class).create();
     private final StockDailyPrice stockDailyPrice = JavaBeanGeneratorCreator.of(StockDailyPrice.class).create();
     private final BigDecimal price = BigDecimal.TEN;
@@ -75,6 +73,10 @@ class TradeAdviceServiceTest {
         when(this.stockPricingExecution.calculateMovingAverage200(any())).thenReturn(movingAvg200);
 
         BigDecimal expectedPrice = BigDecimal.valueOf(10.2);
+        TradePrediction prediction = TradePrediction.builder()
+                .adviceAction(TradeAction.BUY)
+                .tradeConfidence(0.99)
+                .build();
         var expected = TradeRecommendation.builder().tradePrediction(prediction)
                 .id(news.getId())
                 .stockNewsAnalysis(news)
@@ -93,5 +95,92 @@ class TradeAdviceServiceTest {
 
         assertThat(actual).isEqualTo(expected);
 
+    }
+
+
+    @Test
+    void given_nullStockPrice_when_recommend_then_doNotSaveDailyPrice() {
+        var news = createNewsAnalysis(MarketSentiment.NEUTRAL, 0.5);
+
+        TradePrediction prediction = TradePrediction.builder()
+                .adviceAction(TradeAction.BUY)
+                .tradeConfidence(0.99)
+                .build();
+        when(this.stockPriceService.getCurrentStockPrice(anyString())).thenReturn(null);
+        when(this.stockPricingExecution.calculateMovingAverage200(any())).thenReturn(BigDecimal.valueOf(100.0));
+        when(inference.recommend(any())).thenReturn(prediction);
+
+        var actual = subject.recommend(news);
+        assertThat(actual).isNotNull();
+
+        verify(stockDailyPriceRepository, never()).save(any(StockDailyPrice.class));
+        verifyNoInteractions(dtoToPriceConverter);
+        assertThat(actual.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(100.0));
+    }
+
+    @Test
+    void given_nullMovingAverage_when_recommend_then_returnPriceZero() {
+        var news = createNewsAnalysis(MarketSentiment.BULLISH, 0.5);
+
+        TradePrediction prediction
+                 = TradePrediction.builder()
+                .adviceAction(TradeAction.BUY)
+                .tradeConfidence(0.99)
+                .build();
+        when(this.stockPriceService.getCurrentStockPrice(anyString())).thenReturn(dto);
+        when(this.stockPricingExecution.calculateMovingAverage200(any())).thenReturn(null);
+        when(inference.recommend(any())).thenReturn(prediction);
+
+        var actual = subject.recommend(news);
+
+        assertThat(actual).isNotNull();
+
+        assertThat(actual.getPrice()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+
+    private StockNewsAnalysis createNewsAnalysis(MarketSentiment sentiment, double confidence) {
+        return StockNewsAnalysis.builder()
+                .rawNews("Coverage Booster")
+                .ticker("TEST")
+                .stockPrediction(StockPrediction.builder()
+                        .marketSentiment(sentiment)
+                        .sentimentConfidence(BigDecimal.valueOf(confidence))
+                        .build())
+                .id("test-id")
+                .build();
+    }
+
+    @Test
+    void given_neutralMarketSentiment_when_recommend_then_returnNull() {
+        // Arrange
+        String tickerId = "neutral-ticker";
+        var news = StockNewsAnalysis.builder()
+                .rawNews("Market is flat today.")
+                .ticker(tickerId)
+                .stockPrediction(StockPrediction.builder()
+                        .marketSentiment(MarketSentiment.BULLISH)
+                        .sentimentConfidence(BigDecimal.valueOf(0.85)) // Confidence shouldn't affect NEUTRAL
+                        .build())
+                .id(tickerId)
+                .build();
+
+        TradePrediction neutralPrediction = TradePrediction.builder()
+                .adviceAction(TradeAction.NA)
+                .tradeConfidence(1)
+                .build();
+        BigDecimal movingAvg200 = BigDecimal.valueOf(150.00);
+
+        when(this.stockPriceService.getCurrentStockPrice(tickerId)).thenReturn(dto);
+        when(this.dtoToPriceConverter.convert(dto)).thenReturn(this.stockDailyPrice);
+        when(this.stockPricingExecution.calculateMovingAverage200(new String[]{tickerId})).thenReturn(movingAvg200);
+        when(inference.recommend(any())).thenReturn(neutralPrediction);
+
+        // Act
+        var actual = subject.recommend(news);
+
+        // Assert
+        // For NEUTRAL sentiment, adjustment is 0.0. Price should match movingAvg200 exactly (150.00)
+        assertThat(actual).isNull();
     }
 }

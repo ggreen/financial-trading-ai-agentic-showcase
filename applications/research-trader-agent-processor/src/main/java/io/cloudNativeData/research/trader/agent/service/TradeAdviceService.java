@@ -4,11 +4,8 @@ import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
-import io.cloudNativeData.trading.MarketSentiment;
-import io.cloudNativeData.trading.StockDailyPrice;
+import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
-import io.cloudNativeData.trading.TradeParameters;
-import io.cloudNativeData.trading.TradeRecommendation;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +65,13 @@ public class TradeAdviceService {
                 .build();
 
         tradeRecommendationRepository.save(tradeRecommendation);
+
+        if(tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction()))
+        {
+            log.info("NA action for {}, so return null", stockPrice);
+            return null;
+        }
+
         return tradeRecommendation;
     }
 
