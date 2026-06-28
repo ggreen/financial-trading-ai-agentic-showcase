@@ -36,7 +36,7 @@ public class TradeAdviceService {
             stockDailyPriceRepository.save(dtoToPriceConverter.convert(stockPrice));
 
         var movingAverage200 = repository
-                .calculateMovingAverage200(new String[]{stockNewsAnalysis.getId()});
+                .calculateMovingAverage200(stockNewsAnalysis.getId());
 
 
         log.info("MovingAverage 200 stock price {}", movingAverage200);

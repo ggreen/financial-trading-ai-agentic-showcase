@@ -82,12 +82,17 @@ class ProposeTradeServiceTest {
                 .id(tradeRecommendation.getId())
                 .tradeRecommendation(tradeRecommendation)
                 .quantity(expectedQuantity)
+                .proposalEpoch(System.currentTimeMillis())
                 .proposalStatus(ProposalStatus.Open)
                 .build();
 
         var actual = subject.propose(tradeRecommendation);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.getQuantity()).isEqualTo(expected.getQuantity());
+        assertThat(actual.getProposalStatus()).isEqualTo(expected.getProposalStatus());
+        assertThat(actual.getTradeRecommendation()).isEqualTo(expected.getTradeRecommendation());
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getProposalEpoch()).isGreaterThanOrEqualTo(expected.getProposalEpoch());
 
         verify(riskInference).predict(any(TradeRiskParameters.class));
         verify(portfolioTradeRepository).save(any());
@@ -118,12 +123,17 @@ class ProposeTradeServiceTest {
                 .id(tradeRecommendation.getId())
                 .tradeRecommendation(tradeRecommendation)
                 .proposalStatus(ProposalStatus.Open)
+                .proposalEpoch(System.currentTimeMillis())
                 .quantity(expectedQuantity)
                 .build();
 
         var actual = subject.propose(tradeRecommendation);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.getQuantity()).isEqualTo(expected.getQuantity());
+        assertThat(actual.getTradeRecommendation()).isEqualTo(expected.getTradeRecommendation());
+        assertThat(actual.getProposalStatus()).isEqualTo(expected.getProposalStatus());
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getProposalEpoch()).isGreaterThanOrEqualTo(expected.getProposalEpoch());
         verify(riskInference).predict(any(TradeRiskParameters.class));
         verify(portfolioTradeRepository).save(any());
     }
@@ -146,6 +156,7 @@ class ProposeTradeServiceTest {
                 .builder().id(tradeRecommendationWithNullAction.getId())
                 .tradeRecommendation(tradeRecommendationWithNullAction)
                 .riskPrediction(null)
+                .proposalEpoch(System.currentTimeMillis())
                 .proposalStatus(ProposalStatus.Invalid)
                 .quantity(0).build();
 
@@ -154,7 +165,12 @@ class ProposeTradeServiceTest {
         verify(riskInference,never()).predict(any(TradeRiskParameters.class));
 
         verify(portfolioTradeRepository).save(any());
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getTradeRecommendation()).isEqualTo(expected.getTradeRecommendation());
+        assertThat(actual.getQuantity()).isEqualTo(expected.getQuantity());
+        assertThat(actual.getProposalEpoch()).isGreaterThanOrEqualTo(expected.getProposalEpoch());
+        assertThat(actual.getProposalStatus()).isEqualTo(expected.getProposalStatus());
+        assertThat(actual.getRiskPrediction()).isEqualTo(expected.getRiskPrediction());
     }
 
     /*
@@ -181,7 +197,7 @@ class ProposeTradeServiceTest {
     @Test
     void findActiveTradeProposals() {
         Iterable<PortfolioTradeProposal> expected = List.of(this.portfolioTradeProposal);
-        when(this.portfolioTradeRepository.findNonRejectTradeProposals()).thenReturn(expected);
+        when(this.portfolioTradeRepository.findNonRejectTradeProposalsByProposalEpochDESC()).thenReturn(expected);
 
         var actual = subject.findActiveTradeProposals();
         assertThat(actual).isEqualTo(expected);

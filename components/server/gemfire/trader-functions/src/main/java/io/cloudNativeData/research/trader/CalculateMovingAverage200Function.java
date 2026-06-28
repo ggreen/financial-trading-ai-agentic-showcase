@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader;
 
 import nyla.solutions.core.patterns.conversion.Converter;
+import nyla.solutions.core.util.Debugger;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.execute.Function;
 import org.apache.geode.cache.execute.FunctionContext;
@@ -50,6 +51,10 @@ public class CalculateMovingAverage200Function implements Function<Object[]> {
         if (rfc.getArguments() == null || rfc.getArguments().length == 0) {
             throw new FunctionException("Target ticker is null or empty");
         }
+
+        var args = rfc.getArguments();
+
+        logger.info("INPUT ARGS: {}",Debugger.toString(args));
 
         String targetTicker = String.valueOf(rfc.getArguments()[0]);
 

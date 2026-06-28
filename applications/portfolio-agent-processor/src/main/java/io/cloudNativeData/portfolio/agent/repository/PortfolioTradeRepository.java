@@ -13,7 +13,7 @@ public interface PortfolioTradeRepository extends JpaRepository<PortfolioTradeEn
     Iterable<PortfolioTradeProposal> findAllTradeProposals();
 
 
-    @Query(value = "SELECT p.payload FROM portfolio.portfolio_trade_entity p WHERE p.payload->>'proposalStatus' != 'Rejected'",
+    @Query(value = "SELECT p.payload FROM portfolio.portfolio_trade_entity p WHERE p.payload->>'proposalStatus' != 'Rejected' ORDER BY  p.payload->>'proposalEpoch'",
             nativeQuery = true)
-    Iterable<PortfolioTradeProposal> findNonRejectTradeProposals();
+    Iterable<PortfolioTradeProposal> findNonRejectTradeProposalsByProposalEpochDESC();
 }

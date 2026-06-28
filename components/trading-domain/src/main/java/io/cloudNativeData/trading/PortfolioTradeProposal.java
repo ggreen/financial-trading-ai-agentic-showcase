@@ -14,6 +14,7 @@ public class PortfolioTradeProposal{
 
     private String id;
     private int quantity;
+    private Long proposalEpoch;
     private TradeRecommendation tradeRecommendation;
     private RiskPrediction riskPrediction;
     private ProposalStatus proposalStatus;

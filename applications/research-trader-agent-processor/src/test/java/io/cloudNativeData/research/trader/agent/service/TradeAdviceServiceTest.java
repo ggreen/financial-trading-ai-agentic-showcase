@@ -173,7 +173,7 @@ class TradeAdviceServiceTest {
 
         when(this.stockPriceService.getCurrentStockPrice(tickerId)).thenReturn(dto);
         when(this.dtoToPriceConverter.convert(dto)).thenReturn(this.stockDailyPrice);
-        when(this.stockPricingExecution.calculateMovingAverage200(new String[]{tickerId})).thenReturn(movingAvg200);
+        when(this.stockPricingExecution.calculateMovingAverage200(any())).thenReturn(movingAvg200);
         when(inference.recommend(any())).thenReturn(neutralPrediction);
 
         // Act

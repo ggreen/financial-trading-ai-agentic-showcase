@@ -75,11 +75,13 @@ public class ProposeTradeService {
                     .quantity(quantity)
                     .tradeRecommendation(trade)
                     .id(trade.getId())
+                    .proposalEpoch(System.currentTimeMillis())
                     .riskPrediction(riskPrediction)
                     .proposalStatus(ProposalStatus.Open)
                     .build();
         }
 
+        proposal.setProposalEpoch(System.currentTimeMillis());
 
         return saveProposal(proposal);
 
@@ -179,7 +181,7 @@ public class ProposeTradeService {
     }
 
     public Iterable<PortfolioTradeProposal> findActiveTradeProposals() {
-        return this.tradeRepository.findNonRejectTradeProposals();
+        return this.tradeRepository.findNonRejectTradeProposalsByProposalEpochDESC();
     }
 
     public void acceptTradeProposalById(String id) {
