@@ -1,10 +1,10 @@
 package io.cloudNativeData.research.trader;
 
-import io.cloudNativeData.trading.StockDailyPrice;
 import nyla.solutions.core.patterns.conversion.Converter;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.execute.*;
+import org.apache.geode.pdx.PdxInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,14 +33,16 @@ class CalculateMovingAverage200FunctionTest {
     @Mock
     private ResultSender<Object> rs;
     @Mock
-    private Region<String, StockDailyPrice> region;
+    private Region<String, PdxInstance> region;
 
-    private final StockDailyPrice stockDailyPrice = JavaBeanGeneratorCreator.of(StockDailyPrice.class).create();
+    @Mock
+    private PdxInstance stockDailyPrice;
 
     @Mock
     private Converter<Region,Region> toLocalRegion;
 
-    private Collection<StockDailyPrice> regionValues;
+    private Collection<PdxInstance> regionValues;
+    private String id=  "APPL";
 
     @BeforeEach
     void setUp() {
@@ -66,7 +66,7 @@ class CalculateMovingAverage200FunctionTest {
 
         regionValues = new ArrayList<>();
 
-        String[] args = { stockDailyPrice.getId()};
+        String[] args = { id};
         when(rfc.getArguments()).thenReturn(args);
         when(rfc.getDataSet()).thenReturn((Region)region);
         when(rfc.getResultSender()).thenReturn(rs);
@@ -90,7 +90,7 @@ class CalculateMovingAverage200FunctionTest {
 
         // Generate 205 records (exceeding the MOVING_AVERAGE_PERIOD limit of 200)
         // Ensure the sorted system correctly isolates the latest 200 items.
-        StockDailyPrice[] pricesArray = new StockDailyPrice[205];
+        PdxInstance[] pricesArray = new PdxInstance[205];
 
         // Items 0 to 4 (oldest) will have a price of 0
         for (int i = 0; i < 5; i++) {
@@ -107,7 +107,7 @@ class CalculateMovingAverage200FunctionTest {
             pricesArray[i] = createStockPrice("AAPL", priceDate, BigDecimal.TEN);
         }
 
-        Collection<StockDailyPrice> regionValues = Arrays.asList(pricesArray);
+        Collection<PdxInstance> regionValues = Arrays.asList(pricesArray);
         when(region.values()).thenReturn(regionValues);
 
         // Act
@@ -120,17 +120,11 @@ class CalculateMovingAverage200FunctionTest {
         verify(rs).lastResult(expectedAverage);
     }
 
-    private StockDailyPrice createStockPrice(String ticker, LocalDate date, BigDecimal closePrice) {
-        var builder = StockDailyPrice.builder();
+    private PdxInstance createStockPrice(String ticker, LocalDate date, BigDecimal closePrice) {
+        return new MockPdxInstance("className",
+                Map.of("ticker",ticker, "id","ticker","priceDate",date,"closePrice",closePrice ), Set.of("id"),true);
 
-        builder.ticker(ticker);
 
-        if (ticker != null) {
-            // Only stub these if the ticker isn't filtered out,
-            // but for safety during stream operations we stub them anyway.
-            builder.priceDate(date);
-            builder.closePrice(closePrice);
-        }
-        return builder.build();
+
     }
 }

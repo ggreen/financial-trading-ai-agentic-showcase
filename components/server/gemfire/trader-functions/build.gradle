@@ -40,7 +40,7 @@ repositories {
     }
 }
 dependencies {
-    implementation project(':components:trading-domain')
+//    implementation project(':components:trading-domain')
 
     implementation 'com.github.nyla-solutions:nyla.solutions.core:2.5.1'
 
