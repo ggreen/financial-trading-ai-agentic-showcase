@@ -211,8 +211,8 @@
                             </td>
 
                             <td class="py-3.5 px-4 font-mono text-xs">
-                                        <span v-if="item.tradePrediction?.price" class="text-white font-bold">
-                                            ${{ item.tradePrediction.price.toFixed(2) }}
+                                        <span v-if="item?.price" class="text-white font-bold">
+                                            ${{ item.price.toFixed(2) }}
                                         </span>
                                 <span v-else class="text-slate-500 italic">
                                             --
@@ -312,7 +312,7 @@
                                         <div>
                                             <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Target Entry Price</label>
                                             <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
-                                                {{ selectedItem.tradePrediction?.price ? '$' + selectedItem.tradePrediction.price.toFixed(2) : '--' }}
+                                                {{ selectedItem?.price ? '$' + selectedItem.price.toFixed(2) : '--' }}
                                             </div>
                                         </div>
                                         <div>
@@ -377,6 +377,7 @@
             const payloadMockData = [
                 {
                     "id": "VMW",
+                    "price": 182.50,
                     "stockNewsAnalysis": {
                         "id": "A1",
                         "rawNews": "<p><strong>Tanzu expansion</strong> drives incredible <em>Q2 growth</em> vectors across major multi-cloud hybrid enterprise clusters.</p><p>Operational scaling optimization telemetry confirms cross-region pipeline consolidation targets are cleared.</p><p>Additional diagnostic logging vectors indicate robust downstream client retention across core subscription sectors.</p>",
@@ -389,7 +390,6 @@
                     },
                     "tradePrediction": {
                         "adviceAction": "STRONG_BUY",
-                        "price": 182.50,
                         "tradeConfidence": 0.95
                     }
                 }
