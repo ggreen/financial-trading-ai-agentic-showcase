@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,4 +16,5 @@ public class TradeRecommendation {
     private String id;
     private TradePrediction tradePrediction;
     private StockNewsAnalysis stockNewsAnalysis;
+    private BigDecimal price;
 }

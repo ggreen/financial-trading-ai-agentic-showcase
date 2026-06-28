@@ -74,7 +74,7 @@ class ProposeTradeServiceTest {
         tradeRecommendation.getStockNewsAnalysis().getStockPrediction()
                         .setSentimentConfidence(newsConfidence);
 
-        tradeRecommendation.getTradePrediction().setPrice(stockPrice);
+        tradeRecommendation.setPrice(stockPrice);
 
         int expectedQuantity = 340;
 
@@ -107,7 +107,7 @@ class ProposeTradeServiceTest {
                 .getStockPrediction()
                 .setSentimentConfidence(newsConfidence);
 
-        tradeRecommendation.getTradePrediction().setPrice(stockPrice);
+        tradeRecommendation.setPrice(stockPrice);
 
         int expectedQuantity = 500;
 
@@ -135,7 +135,6 @@ class ProposeTradeServiceTest {
         TradePrediction invalidTradePrediction = TradePrediction.builder()
                 .tradeConfidence(0)
                 .adviceAction(null)
-                .price(BigDecimal.ZERO)
                 .build();
         var tradeRecommendationWithNullAction = TradeRecommendation.builder()
                 .id(tradeRecommendation.getId())
@@ -276,7 +275,7 @@ class ProposeTradeServiceTest {
     void given_buy_trade_with_zero_or_negative_price_when_propose_then_quantity_is_zero() {
         // Arrange
         tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.BUY);
-        tradeRecommendation.getTradePrediction().setPrice(BigDecimal.ZERO);
+        tradeRecommendation.setPrice(BigDecimal.ZERO);
         when(converter.convert(any())).thenReturn(portfolioTradeEntity);
 
         // Act

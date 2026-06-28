@@ -146,14 +146,14 @@ public class ProposeTradeService {
         return 0;
     }
 
-    public int determineBuyQuantity(TradeRecommendation advice) {
+    public int determineBuyQuantity(TradeRecommendation tradeRecommendation) {
 
         // 1. Guard against null advice or missing trade prediction
-        if (advice == null || advice.getTradePrediction() == null ) {
+        if (tradeRecommendation == null || tradeRecommendation.getTradePrediction() == null ) {
             return 0;
         }
 
-        var stockMarketPrice = advice.getTradePrediction().getPrice();
+        var stockMarketPrice = tradeRecommendation.getPrice();
 
         // 2. Safe to compare now
         if (stockMarketPrice == null || stockMarketPrice.compareTo(BigDecimal.ZERO) <= 0) {
@@ -166,7 +166,7 @@ public class ProposeTradeService {
 
         // 3. Scale the capital based on the AI/News conviction score
         // If sentiment is 0.5, we only use 50% of our maximum allowed capital
-        var allocatedCapital = maxTradeCapital.multiply(advice.getStockNewsAnalysis()
+        var allocatedCapital = maxTradeCapital.multiply(tradeRecommendation.getStockNewsAnalysis()
                 .getStockPrediction().getSentimentConfidence());
 
         // 4. Calculate share quantity
