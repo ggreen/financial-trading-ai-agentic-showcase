@@ -16,6 +16,7 @@ $GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=TradeRecommendation
 
 $GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockDailyPrice --type=PARTITION_PERSISTENT"
 
-$GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockPrice --type=PARTITION"
+#$GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockPrice --type=PARTITION"
+$GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockPrice --type=PARTITION --entry-time-to-live-expiration=7200 --entry-time-to-live-expiration-action=DESTROY"
 
 $GEMFIRE_HOME/bin/gfsh -e "connect" -e "deploy --jar=$PROJECT_HOME/components/server/gemfire/trader-functions/build/libs/trader-functions-0.0.1-SNAPSHOT-all.jar"
