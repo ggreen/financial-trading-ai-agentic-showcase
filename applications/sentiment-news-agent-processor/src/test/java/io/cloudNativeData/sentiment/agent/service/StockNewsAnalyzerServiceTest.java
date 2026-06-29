@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -68,5 +69,25 @@ class StockNewsAnalyzerServiceTest {
         var actual = subject.findAllNews();
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void findAllOrderedByTicker() {
+
+        StockNewsAnalysis news1 = StockNewsAnalysis.builder().ticker("Z").build();
+        StockNewsAnalysis news2 = StockNewsAnalysis.builder().ticker("A").build();
+        StockNewsAnalysis news3 = StockNewsAnalysis.builder().ticker("C").build();
+        var expected = List.of(news1,news2,news3);
+        when(stockNewsAnalysisRepository.findAll()).thenReturn(expected);
+
+        var actual = subject.findAllNews();
+
+        assertThat(actual).isNotNull();
+
+        Iterator<StockNewsAnalysis> iterator = actual.iterator();
+
+        assertThat(iterator.next()).isEqualTo(news2);
+        assertThat(iterator.next()).isEqualTo(news3);
+        assertThat(iterator.next()).isEqualTo(news1);
     }
 }

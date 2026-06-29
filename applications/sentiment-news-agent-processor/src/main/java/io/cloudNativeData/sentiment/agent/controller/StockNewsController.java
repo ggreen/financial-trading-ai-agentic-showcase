@@ -5,10 +5,7 @@ import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
 import nyla.solutions.core.patterns.integration.Publisher;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("stocks")
@@ -25,5 +22,10 @@ public class StockNewsController {
         publisher.send(stockNewsAnalysis);
 
         return stockNewsAnalysis;
+    }
+
+    @GetMapping
+    public Iterable<StockNewsAnalysis> findAll() {
+        return this.service.findAllNews();
     }
 }

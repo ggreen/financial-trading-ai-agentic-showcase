@@ -11,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -44,5 +46,15 @@ class StockNewsControllerTest {
         assertThat(actual).isEqualTo(expectedNewsAnalysis);
 
         verify(publisher).send(any());
+    }
+
+    @Test
+    void findAll() {
+        Iterable<StockNewsAnalysis> expected = List.of(expectedNewsAnalysis);
+        when(service.findAllNews()).thenReturn(expected);
+
+        Iterable<StockNewsAnalysis> actual = subject.findAll();
+
+        assertThat(actual).isEqualTo(expected);
     }
 }

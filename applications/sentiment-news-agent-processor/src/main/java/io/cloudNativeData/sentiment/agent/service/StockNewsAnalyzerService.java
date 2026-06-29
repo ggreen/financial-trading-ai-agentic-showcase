@@ -7,6 +7,10 @@ import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class StockNewsAnalyzerService {
@@ -35,6 +39,11 @@ public class StockNewsAnalyzerService {
 
 
     public Iterable<StockNewsAnalysis> findAllNews() {
-        return stockNewsAnalysisRepository.findAll();
+        var newsList = new ArrayList<StockNewsAnalysis>(stockNewsAnalysisRepository.findAll());
+
+        // Sort by ticker in memory
+        return newsList.stream()
+                .sorted(Comparator.comparing(StockNewsAnalysis::getTicker))
+                .collect(Collectors.toList());
     }
 }
