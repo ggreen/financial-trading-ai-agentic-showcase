@@ -179,7 +179,7 @@
                             {{ formatNumber(trade.quantity) }}
                         </td>
                         <td class="px-6 py-4 text-right font-mono text-sm text-white">
-                            {{ trade.tradeRecommendation?.tradePrediction?.price ? '$' + formatPrice(trade.tradeRecommendation.tradePrediction.price) : 'Market' }}
+                            {{ trade.tradeRecommendation?.price ? '$' + formatPrice(trade.tradeRecommendation.price) : 'Market' }}
                         </td>
                         <td class="px-6 py-4 text-center">
                             <span :class="trade.proposalStatus === 'Invalid' ? 'text-amber-400 bg-amber-400/10 border-amber-400/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20'"
@@ -294,7 +294,7 @@
                             <div class="bg-[#121c23] p-2.5 rounded border border-gray-800/80">
                                 <span class="text-gray-400 block text-[10px] uppercase mb-0.5">Execution Price</span>
                                 <span class="text-white font-bold">
-                                    {{ selectedTrade.tradeRecommendation?.tradePrediction?.price ? '$' + formatPrice(selectedTrade.tradeRecommendation.tradePrediction.price) : 'Market' }}
+                                    {{ selectedTrade.tradeRecommendation?.price ? '$' + formatPrice(selectedTrade.tradeRecommendation.price) : 'Market' }}
                                 </span>
                             </div>
                             <div class="bg-[#121c23] p-2.5 rounded border border-gray-800/80">
@@ -538,6 +538,7 @@
                     "quantity": 1420,
                     "tradeRecommendation": {
                         "id": "rec_01",
+                        "price": 202.00,
                         "stockNewsAnalysis": {
                             "id": "news_01",
                             "rawNews": `<p class="mb-2">Worries about Adobe's growth plans and turnover inside the company's <a href="#" class="text-[#00c4b4] underline">C-suite</a> have the stock tumbling to its lowest point in eight years.</p><p>Adobe (<a href="#" class="text-[#00c4b4] underline">ADBE</a>) shares were down 7% to around $202 in recent trading, their lowest level since early 2018...</p>`,
@@ -550,7 +551,6 @@
                         },
                         "tradePrediction": {
                             "adviceAction": "BUY_DIP",
-                            "price": 202.00,
                             "tradeConfidence": 0.76
                         }
                     },
@@ -566,6 +566,7 @@
                     "quantity": 350,
                     "tradeRecommendation": {
                         "id": "rec_02",
+                        "price": 174.50,
                         "stockNewsAnalysis": {
                             "id": "news_02",
                             "rawNews": `<p>IBM announces record earnings milestones beating analyst computational thresholds across cloud orchestration deployments globally.</p>`,
@@ -578,7 +579,6 @@
                         },
                         "tradePrediction": {
                             "adviceAction": "BUY",
-                            "price": 174.50,
                             "tradeConfidence": 0.85
                         }
                     },
