@@ -6,6 +6,7 @@ import io.cloudNativeData.trading.news.NewsParameters;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,12 +34,16 @@ public class AiConfig {
 
     @Bean
     StockAnalysisInference inference(ChatClient chatClient,
+                                     ChatModel chatModel,
                                      List<Advisor> advisor) {
         return news -> {
             var results = chatClient.prompt(prompt)
                     .advisors(advisor)
                     .call()
                     .entity(StockPrediction.class);
+
+            if(results != null)
+                results.setModelName(chatModel.getDefaultOptions().getModel());
 
             log.info("AI results: {}", results);
             return results;

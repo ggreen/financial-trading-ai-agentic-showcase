@@ -19,4 +19,5 @@ public class StockPrediction {
     private MarketSentiment marketSentiment;
     private BigDecimal sentimentConfidence;
     private String newsSummary;
+    private String modelName;
 }

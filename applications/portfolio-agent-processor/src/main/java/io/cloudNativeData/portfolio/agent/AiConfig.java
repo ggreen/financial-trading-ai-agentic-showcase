@@ -4,6 +4,7 @@ import io.cloudNativeData.portfolio.agent.ai.RiskInference;
 import io.cloudNativeData.trading.risk.RiskPrediction;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,7 @@ public class AiConfig {
     }
 
     @Bean
-    RiskInference tradeRiskInference(ChatClient chatClient, List<Advisor> advisors) {
+    RiskInference tradeRiskInference(ChatClient chatClient, ChatModel chatModel, List<Advisor> advisors) {
         return riskParameters ->  {
 
             var promptTemplate = new PromptTemplate(prompt);
@@ -47,10 +48,15 @@ public class AiConfig {
                            "newsSummary", riskParameters.newsSummary())
                     );
 
-            return chatClient.prompt(prompt)
+            var riskPrediction = chatClient.prompt(prompt)
                     .advisors(advisors)
                     .call()
                     .entity(RiskPrediction.class);
+
+            if(riskPrediction != null)
+                riskPrediction.setModelName(chatModel.getDefaultOptions().getModel());
+
+            return riskPrediction;
         };
     }
 }

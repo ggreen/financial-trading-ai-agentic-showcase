@@ -4,6 +4,7 @@ import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.trading.TradePrediction;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ public class AiConfig {
     }
 
     @Bean
-    TradePredictionInference tradePredictionInference(ChatClient chatClient, List<Advisor> advisors) {
+    TradePredictionInference tradePredictionInference(ChatClient chatClient, ChatModel chatModel, List<Advisor> advisors) {
         return tradeParameters ->  {
 
             var promptTemplate = new PromptTemplate(prompt);
@@ -44,10 +45,15 @@ public class AiConfig {
                             "marketSentimentConfidence",tradeParameters.getPrediction().getSentimentConfidence())
                     );
 
-            return chatClient.prompt(prompt)
+            var tradePrediction = chatClient.prompt(prompt)
                     .advisors(advisors)
                     .call()
                     .entity(TradePrediction.class);
+
+            if(tradePrediction != null)
+                tradePrediction.setModelName(chatModel.getDefaultOptions().getModel());
+
+            return tradePrediction;
         };
     }
 }

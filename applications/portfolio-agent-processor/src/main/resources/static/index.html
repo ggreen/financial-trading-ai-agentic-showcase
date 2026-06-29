@@ -238,6 +238,14 @@
                             <span>Ticker Target: <span class="text-[#00c4b4] font-mono font-bold">{{ selectedTrade.tradeRecommendation?.stockNewsAnalysis?.ticker || 'N/A' }}</span></span>
                         </div>
 
+
+                        <div class="bg-[#121c23] p-3 rounded border border-gray-800/80 mb-4 text-xs">
+                            <span class="text-gray-400 block font-mono text-[10px] uppercase mb-1">Model</span>
+                            <p class="text-gray-200 leading-relaxed font-medium">
+                                {{ selectedTrade.tradeRecommendation?.stockNewsAnalysis?.stockPrediction?.modelName || 'Unknown' }}
+                            </p>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-3 mb-4 font-mono text-xs">
                             <div class="bg-[#121c23] p-2.5 rounded border border-gray-800/80">
                                 <span class="text-gray-400 block text-[10px] uppercase mb-0.5">Market Sentiment</span>
@@ -282,6 +290,13 @@
                         <div class="flex items-center space-x-2 text-sm font-semibold text-white mb-3">
                             <i class="fa-solid fa-brain text-sky-400"></i>
                             <span>Trading Action Recommendation Strategy</span>
+                        </div>
+
+                        <div class="bg-[#121c23] p-3 rounded border border-gray-800/80 mb-4 text-xs">
+                            <span class="text-gray-400 block font-mono text-[10px] uppercase mb-1">Model</span>
+                            <p class="text-gray-200 leading-relaxed font-medium">
+                                {{ selectedTrade.tradeRecommendation?.tradePrediction?.modelName || 'Unknown' }}
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-3 gap-3 font-mono text-xs">
@@ -333,6 +348,13 @@
                                     {{ selectedTrade.proposalStatus || 'Unchecked' }}
                                 </span>
                             </div>
+                        </div>
+
+                        <div class="bg-[#121c23] p-3 rounded border border-gray-800/80 mb-4 text-xs">
+                            <span class="text-gray-400 block font-mono text-[10px] uppercase mb-1">Model</span>
+                            <p class="text-gray-200 leading-relaxed font-medium">
+                                {{ selectedTrade.riskPrediction?.modelName || 'Unknown' }}
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 mb-4 font-mono text-xs">
