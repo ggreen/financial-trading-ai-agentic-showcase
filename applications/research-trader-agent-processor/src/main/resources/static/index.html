@@ -271,6 +271,20 @@
                                         </div>
                                     </div>
                                     <div>
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Raw News Struct Payload</label>
+                                        <div class="p-3 bg-tanzu-bg rounded border border-tanzu-border font-mono text-xs text-amber-400 leading-relaxed max-h-48 overflow-y-auto custom-popup-scroll" v-html="selectedItem.stockNewsAnalysis?.rawNews || 'No raw news content available'">
+                                        </div>
+                                    </div>
+
+
+                                    <div>
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Model</label>
+                                        <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
+                                            {{ selectedItem.stockNewsAnalysis?.stockPrediction?.modelName || 'Unknown' }}
+                                        </div>
+                                    </div>
+
+                                    <div>
                                         <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Cognitive Summary Interpretation</label>
                                         <div class="p-3 bg-tanzu-bg rounded border border-tanzu-border text-xs text-slate-200 leading-normal h-[76px] overflow-y-auto custom-popup-scroll">
                                             {{ selectedItem.stockNewsAnalysis?.stockPrediction?.newsSummary || 'Metrics failed compilation summary.' }}
@@ -281,11 +295,6 @@
                                         <span :class="selectedItem.stockNewsAnalysis?.stockPrediction?.marketSentiment === 'BULLISH' ? 'bg-tanzu-green/10 text-tanzu-green border-tanzu-green/30' : 'bg-red-500/10 text-red-400 border-red-500/30'" class="text-[11px] font-bold px-2 py-1 rounded border block text-center font-mono">
                                                 {{ selectedItem.stockNewsAnalysis?.stockPrediction?.marketSentiment || 'UNKNOWN' }}
                                             </span>
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Raw News Struct Payload</label>
-                                        <div class="p-3 bg-tanzu-bg rounded border border-tanzu-border font-mono text-xs text-amber-400 leading-relaxed max-h-48 overflow-y-auto custom-popup-scroll" v-html="selectedItem.stockNewsAnalysis?.rawNews || 'No raw news content available'">
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -300,6 +309,13 @@
                                     <div class="text-[10px] font-bold tracking-wider text-tanzu-green uppercase font-mono mb-2 flex items-center justify-between">
                                         <span>Box 2: Derived AI Intelligence</span>
                                         <span class="bg-slate-800 text-tanzu-green px-1.5 py-0.5 rounded text-[9px]">OUTPUT</span>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Model</label>
+                                        <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
+                                            {{ selectedItem.tradePrediction?.modelName || 'Unknown' }}
+                                        </div>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-3 mb-4">
