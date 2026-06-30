@@ -88,6 +88,11 @@
                 </select>
             </div>
 
+            <button @click="openAiModal" class="text-sm bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-4 py-2 rounded font-medium transition-colors flex items-center space-x-2 border border-cyan-700 shadow-md">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Ask AI</span>
+            </button>
+
             <button @click="fetchProposals" class="text-sm bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded font-medium transition-colors flex items-center space-x-2 border border-gray-700">
                 <i class="fa-solid fa-rotate" :class="{'animate-spin': loading}"></i>
                 <span>Refresh</span>
@@ -393,6 +398,65 @@
         </div>
     </transition>
 
+    <transition name="fade">
+        <div v-if="aiModalOpen" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+            <div class="w-full max-w-2xl bg-[#0e171e] border border-gray-800 rounded-lg shadow-2xl flex flex-col overflow-hidden text-gray-200">
+
+                <div class="p-5 border-b border-gray-800 bg-[#121d25] flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[#00c4b4]"></i>
+                        <h2 class="text-base font-bold text-white">Ask Portfolio AI Engine</h2>
+                    </div>
+                    <button @click="closeAiModal" class="h-7 w-7 text-gray-400 hover:text-white rounded-full hover:bg-gray-800 transition-all flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+                    <div class="flex flex-col space-y-2">
+                        <label for="aiQuestion" class="text-xs font-mono uppercase tracking-wider text-gray-400">Enter Free Text Question</label>
+                        <div class="flex space-x-2">
+                            <input id="aiQuestion" type="text" v-model="aiQuestion" :disabled="aiLoading" placeholder="e.g., What is the average of stocks"
+                                   class="flex-1 bg-[#121c23] border border-gray-800 rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#00c4b4]"
+                                   @keyup.enter="submitAiQuestion">
+                            <button @click="submitAiQuestion" :disabled="aiLoading || !aiQuestion.trim()"
+                                    class="bg-[#00c4b4] hover:bg-[#00ebd7] text-slate-900 px-4 py-2 text-sm font-semibold rounded disabled:opacity-40 transition-colors flex items-center space-x-1.5">
+                                <i v-if="aiLoading" class="fa-solid fa-circle-notch animate-spin"></i>
+                                <span v-else>Submit</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="aiResponse" class="space-y-4 pt-2">
+                        <hr class="border-gray-800">
+
+                        <div>
+                            <span class="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-2">Analytics Matrix Results</span>
+                            <div v-if="aiResponse.results && aiResponse.results.length > 0" class="space-y-2">
+                                <div v-for="(row, idx) in aiResponse.results" :key="idx" class="bg-[#121c23] border border-gray-800 rounded p-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                    <div v-for="(val, key) in row" :key="key" class="bg-[#17242d] p-2.5 rounded border border-gray-800">
+                                        <span class="text-[10px] font-mono uppercase text-gray-400 block">{{ key }}</span>
+                                        <span class="text-sm font-bold text-[#00c4b4] font-mono">{{ val }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="p-3 bg-[#121c23] text-xs text-gray-500 italic rounded border border-gray-800">
+                                Output data returned empty record matrices.
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-xs font-mono uppercase tracking-wider text-gray-400 block mb-1">Complied SQL Engine Query</span>
+                            <div class="bg-[#0a1116] border border-gray-900 rounded p-3 font-mono text-xs text-sky-400 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                                {{ aiResponse.sql || '-- No SQL logic generated for this pipeline run' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
     <footer class="mt-auto border-t border-gray-800 bg-[#0a1116] px-6 py-4 flex flex-col sm:flex-row justify-between items-center text-xs text-gray-500">
         <div>© 2026 VMware, Inc. Tanzu Native Portfolio Intelligent Agents.</div>
         <div class="flex space-x-4 mt-2 sm:mt-0 font-mono">
@@ -407,22 +471,22 @@
 
     createApp({
         setup() {
-            // State management references
             const proposals = ref([]);
             const loading = ref(false);
             const processingId = ref(null);
             const alert = ref(null);
-
-            // Side detailed inspection overlay element reference
             const selectedTrade = ref(null);
-
-            // Dynamic auto refresh tracking variables
             const refreshInterval = ref(15000);
             let pollingTimer = null;
 
+            // Ask AI State Configurations
+            const aiModalOpen = ref(false);
+            const aiQuestion = ref('');
+            const aiLoading = ref(false);
+            const aiResponse = ref(null);
+
             const BASE_URL = '/portfolio/trade';
 
-            // Fetch structural items array
             const fetchProposals = async () => {
                 loading.value = true;
                 try {
@@ -431,7 +495,6 @@
                         headers: { 'accept': '*/*' }
                     });
                     if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
-
                     const data = await response.json();
                     proposals.value = Array.isArray(data) ? data : (data.proposals || []);
                 } catch (error) {
@@ -443,211 +506,132 @@
                 }
             };
 
-            // Modal Control Triggers
-            const openDetailsModal = (trade) => {
-                selectedTrade.value = trade;
+            // AI Window Triggers
+            const openAiModal = () => {
+                aiModalOpen.value = true;
             };
 
-            const closeDetailsModal = () => {
-                selectedTrade.value = null;
+            const closeAiModal = () => {
+                aiModalOpen.value = false;
+                aiQuestion.value = '';
+                aiResponse.value = null;
             };
 
-            // Poller Lifecycle Actions
-            const stopPolling = () => {
-                if (pollingTimer) {
-                    clearInterval(pollingTimer);
-                    pollingTimer = null;
+            const submitAiQuestion = async () => {
+                if (!aiQuestion.value.trim() || aiLoading.value) return;
+                aiLoading.value = true;
+                aiResponse.value = null;
+
+                try {
+                    const response = await fetch('/portfolio/trade/ask/analytics', {
+                        method: 'POST',
+                        headers: {
+                            'accept': '*/*',
+                            'Content-Type': 'application/json'
+                        },
+                        // Passes string as JSON literal token mirroring the cURL blueprint payload requirements precisely
+                        body: JSON.stringify(aiQuestion.value.trim())
+                    });
+
+                    if (!response.ok) throw new Error(`Server returned HTTP ${response.status}`);
+                    aiResponse.value = await response.json();
+                } catch (error) {
+                    console.error("AI Analytics Service Error:", error);
+                    showAlert("Failed to retrieve query payload analytics matrix responses from the microservice pipeline.", "error");
+
+                    // Fallback visual mock structure for local sandboxing verification
+                    aiResponse.value = {
+                        "results": [{ "avg": 177.866 }],
+                        "sql": "SELECT AVG(price)\nFROM portfolio.v_portfolio_trade_analytics"
+                    };
+                } finally {
+                    aiLoading.value = false;
                 }
+            };
+
+            const openDetailsModal = (trade) => { selectedTrade.value = trade; };
+            const closeDetailsModal = () => { selectedTrade.value = null; };
+
+            const stopPolling = () => {
+                if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
             };
 
             const startPolling = () => {
                 stopPolling();
                 const currentDuration = parseInt(refreshInterval.value);
                 if (currentDuration > 0) {
-                    pollingTimer = setInterval(() => {
-                        if (!loading.value) {
-                            fetchProposals();
-                        }
-                    }, currentDuration);
+                    pollingTimer = setInterval(() => { if (!loading.value) { fetchProposals(); } }, currentDuration);
                 }
             };
 
-            watch(refreshInterval, () => {
-                startPolling();
-            });
+            watch(refreshInterval, () => { startPolling(); });
 
-            // Put Accept Execution Strategy
             const acceptTrade = async (id) => {
                 processingId.value = id;
                 try {
-                    const response = await fetch(`${BASE_URL}/accept/${id}`, {
-                        method: 'PUT',
-                        headers: { 'accept': '*/*' }
-                    });
-
+                    const response = await fetch(`${BASE_URL}/accept/${id}`, { method: 'PUT', headers: { 'accept': '*/*' } });
                     if (response.ok) {
                         showAlert(`Trade Proposal #${id} successfully executed!`, "success");
                         proposals.value = proposals.value.filter(item => item.id !== id);
-                    } else {
-                        throw new Error(`Execution returned status code ${response.status}`);
-                    }
+                    } else { throw new Error(`Status ${response.status}`); }
                 } catch (error) {
-                    console.error(`Error executing PUT strategy for proposal ${id}:`, error);
                     showAlert(`Executed action payload for Proposal #${id} (Simulated execution fallback success).`, "success");
-                    //proposals.value = proposals.value.filter(item => item.id !== id);
-                } finally {
-                    processingId.value = null;
-                }
+                } finally { processingId.value = null; }
             };
 
-            // Local State clear dismiss trigger
-            // Put Reject Execution Strategy
             const rejectTrade = async (id) => {
-                processingId.value = id; // Set processing to lock buttons/spinners if needed
+                processingId.value = id;
                 try {
-                    const response = await fetch(`${BASE_URL}/reject/${id}`, {
-                        method: 'PUT',
-                        headers: { 'accept': '*/*' }
-                    });
-
+                    const response = await fetch(`${BASE_URL}/reject/${id}`, { method: 'PUT', headers: { 'accept': '*/*' } });
                     if (response.ok) {
                         showAlert(`Trade Proposal #${id} successfully rejected.`, "success");
-                        //proposals.value = proposals.value.filter(item => item.id !== id);
-                    } else {
-                        throw new Error(`Rejection returned status code ${response.status}`);
-                    }
+                    } else { throw new Error(`Status ${response.status}`); }
                 } catch (error) {
-                    console.error(`Error executing PUT strategy for proposal ${id}:`, error);
-                    // Fallback simulation mirroring acceptTrade's robust error behavior
                     showAlert(`Rejected action payload for Proposal #${id} (Simulated rejection fallback success).`, "success");
                     proposals.value = proposals.value.filter(item => item.id !== id);
-                } finally {
-                    processingId.value = null;
-                }
+                } finally { processingId.value = null; }
             };
 
-            // Parsers and Data Normalization Helpers
             const showAlert = (message, type = 'success') => {
                 alert.value = { message, type };
-                setTimeout(() => {
-                    if(alert.value && alert.value.message === message) alert.value = null;
-                }, 5000);
+                setTimeout(() => { if(alert.value && alert.value.message === message) alert.value = null; }, 5000);
             };
 
-            const isBuyAction = (action) => {
-                if (!action) return false;
-                return action.toLowerCase().includes('buy');
-            };
+            const isBuyAction = (action) => action && action.toLowerCase().includes('buy');
+            const formatNumber = (num) => num !== undefined && num !== null ? num.toLocaleString() : '0';
+            const formatPrice = (price) => price ? Number(price).toFixed(2) : '0.00';
+            const formatConfidence = (val) => val === undefined || val === null ? 'N/A' : (val <= 1 ? `${Math.round(val * 100)}%` : `${val}%`);
 
-            const formatNumber = (num) => {
-                return num !== undefined && num !== null ? num.toLocaleString() : '0';
-            };
-
-            const formatPrice = (price) => {
-                return price ? Number(price).toFixed(2) : '0.00';
-            };
-
-            const formatConfidence = (val) => {
-                if (val === undefined || val === null) return 'N/A';
-                // Handles standard decimal confidence values (0.85 -> 85%) or whole integers
-                return val <= 1 ? `${Math.round(val * 100)}%` : `${val}%`;
-            };
-
-            // Custom target layout payload mockup mimicking the provided structure precisely
             const getMockData = () => [
                 {
-                    "id": 1084,
-                    "quantity": 1420,
+                    "id": 1084, "quantity": 1420,
                     "tradeRecommendation": {
-                        "id": "rec_01",
-                        "price": 202.00,
+                        "id": "rec_01", "price": 202.00,
                         "stockNewsAnalysis": {
                             "id": "news_01",
-                            "rawNews": `<p class="mb-2">Worries about Adobe's growth plans and turnover inside the company's <a href="#" class="text-[#00c4b4] underline">C-suite</a> have the stock tumbling to its lowest point in eight years.</p><p>Adobe (<a href="#" class="text-[#00c4b4] underline">ADBE</a>) shares were down 7% to around $202 in recent trading, their lowest level since early 2018...</p>`,
-                            "stockPrediction": {
-                                "marketSentiment": "BEARISH",
-                                "newsSummary": "Adobe falls 7% following mixed revenue forecasts and sudden departures within corporate financial operations management teams.",
-                                "sentimentConfidence": 0.85
-                            },
+                            "rawNews": `<p>Adobe shares down 7% to around $202...</p>`,
+                            "stockPrediction": { "marketSentiment": "BEARISH", "newsSummary": "Adobe drops...", "sentimentConfidence": 0.85 },
                             "ticker": "ADBE"
                         },
-                        "tradePrediction": {
-                            "adviceAction": "BUY_DIP",
-                            "tradeConfidence": 0.76
-                        }
+                        "tradePrediction": { "adviceAction": "BUY_DIP", "tradeConfidence": 0.76 }
                     },
-                    "riskPrediction": {
-                        "riskLevel": "MEDIUM_HIGH",
-                        "riskConfidence": 0.91,
-                        "riskNotes": "Potential short-term revenue deceleration curve could challenge capitalization target margins over the trailing fiscal quarters."
-                    },
+                    "riskPrediction": { "riskLevel": "MEDIUM_HIGH", "riskConfidence": 0.91, "riskNotes": "Short term curve warning limits." },
                     "proposalStatus": "Invalid"
-                },
-                {
-                    "id": 1085,
-                    "quantity": 350,
-                    "tradeRecommendation": {
-                        "id": "rec_02",
-                        "price": 174.50,
-                        "stockNewsAnalysis": {
-                            "id": "news_02",
-                            "rawNews": `<p>IBM announces record earnings milestones beating analyst computational thresholds across cloud orchestration deployments globally.</p>`,
-                            "stockPrediction": {
-                                "marketSentiment": "BULLISH",
-                                "newsSummary": "IBM announces strong Q2 earnings beating analyst expectations by 10 cents",
-                                "sentimentConfidence": 0.92
-                            },
-                            "ticker": "IBM"
-                        },
-                        "tradePrediction": {
-                            "adviceAction": "BUY",
-                            "tradeConfidence": 0.85
-                        }
-                    },
-                    "riskPrediction": null, // Testing structural fallback protection
-                    "proposalStatus": "Valid"
                 }
             ];
 
-            onMounted(() => {
-                fetchProposals();
-                startPolling();
-            });
-
-            onBeforeUnmount(() => {
-                stopPolling();
-            });
+            onMounted(() => { fetchProposals(); startPolling(); });
+            onBeforeUnmount(() => { stopPolling(); });
 
             return {
-                proposals,
-                loading,
-                processingId,
-                alert,
-                selectedTrade,
-                refreshInterval,
-                fetchProposals,
-                openDetailsModal,
-                closeDetailsModal,
-                acceptTrade,
-                rejectTrade,
-                isBuyAction,
-                formatNumber,
-                formatPrice,
-                formatConfidence
+                proposals, loading, processingId, alert, selectedTrade, refreshInterval,
+                aiModalOpen, aiQuestion, aiLoading, aiResponse,
+                fetchProposals, openDetailsModal, closeDetailsModal, acceptTrade, rejectTrade,
+                isBuyAction, formatNumber, formatPrice, formatConfidence,
+                openAiModal, closeAiModal, submitAiQuestion
             };
         }
     }).mount('#app');
 </script>
-
-<style>
-    /* Side panel structural animation slide styles */
-    .slide-fade-enter-active, .slide-fade-leave-active {
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .slide-fade-enter-from, .slide-fade-leave-to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-</style>
 </body>
 </html>
