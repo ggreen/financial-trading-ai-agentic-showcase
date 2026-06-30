@@ -26,6 +26,36 @@ databaseChangeLog:
               
               create table portfolio.portfolio_trade_entity 
               (id varchar(255) not null, payload jsonb not null, primary key (id));
+              
+              
+              CREATE OR REPLACE VIEW portfolio.v_portfolio_trade_analytics AS
+              SELECT 
+                  id,
+                  -- Root level fields
+                  (payload->>'quantity')::NUMERIC AS quantity,
+                  (payload->>'proposalEpoch')::BIGINT AS proposal_epoch,
+
+                  -- Trade Prediction fields
+                  payload->'tradeRecommendation'->'tradePrediction'->>'adviceAction' AS advice_action,
+                  (payload->'tradeRecommendation'->'tradePrediction'->>'tradeConfidence')::NUMERIC AS trade_confidence,
+                  payload->'tradeRecommendation'->'tradePrediction'->>'modelName' AS trade_prediction_model_name,
+
+                  -- Trade Recommendation level fields
+                  (payload->'tradeRecommendation'->>'price')::NUMERIC AS price,
+
+                  -- Stock News Analysis fields
+                  payload->'tradeRecommendation'->'stockNewsAnalysis'->>'ticker' AS ticker,
+                  payload->'tradeRecommendation'->'stockNewsAnalysis'->'stockPrediction'->>'marketSentiment' AS market_sentiment,
+                  (payload->'tradeRecommendation'->'stockNewsAnalysis'->'stockPrediction'->>'sentimentConfidence')::NUMERIC AS sentiment_confidence,
+                  payload->'tradeRecommendation'->'stockNewsAnalysis'->'stockPrediction'->>'modelName' AS stock_prediction_model_name,
+                  payload->'tradeRecommendation'->'stockNewsAnalysis'->'stockPrediction'->>'newsSummary' AS news_summary,
+
+                  -- Risk Prediction fields
+                  payload->'riskPrediction'->>'riskLevel' AS risk_level,
+                  payload->'riskPrediction'->>'riskNotes' AS risk_notes,
+                  payload->'riskPrediction'->>'modelName' AS risk_model_name
+
+              FROM portfolio.portfolio_trade_entity;
   - changeSet:
       id: 20260608-02-sql
       author: portfolio-agent
