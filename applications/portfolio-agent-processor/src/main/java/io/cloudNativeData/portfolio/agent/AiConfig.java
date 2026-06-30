@@ -2,10 +2,12 @@ package io.cloudNativeData.portfolio.agent;
 
 import io.cloudNativeData.portfolio.agent.ai.RiskInference;
 import io.cloudNativeData.trading.risk.RiskPrediction;
+import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,6 +29,13 @@ public class AiConfig {
             newsSummary: {newsSummary}
             Output JSON: 'riskLevel' (HIGH/MEDIUM/LOW), 'riskConfidence', 'riskNotes'
             """;
+
+//    @Bean
+//    public SyncMcpToolCallbackProvider syncMcpToolCallbackProvider(List<McpSyncClient> mcpClients) {
+//        return SyncMcpToolCallbackProvider.builder()
+//                .mcpClients(mcpClients)
+//                .build();
+//    }
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder)

@@ -1,8 +1,12 @@
 package io.cloudNativeData.portfolio.sql.analytics.mcp;
 
 import io.cloudNativeData.portfolio.sql.analytics.mcp.service.CleanSqlCodeService;
+import io.cloudNativeData.portfolio.sql.analytics.mcp.service.SqlExecutorMcpService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -68,11 +72,17 @@ public class AiConfig {
         return builder.defaultSystem(systemInstructions).build();
     }
 
+    @Bean
+    public ToolCallbackProvider weatherTools(SqlExecutorMcpService service) {
+        return MethodToolCallbackProvider.builder().toolObjects(service).build();
+    }
+
 
     @Bean
-    Converter<String,String> converter(ChatClient chatClient, CleanSqlCodeService cleanSqlCodeService) {
+    Converter<String,String> converter(ObjectProvider<ChatClient> chatClientProvider, CleanSqlCodeService cleanSqlCodeService) {
 
-        return prompt ->  cleanSqlCodeService.cleanSqlCodeBlocks(chatClient.prompt()
+        return prompt ->  cleanSqlCodeService.cleanSqlCodeBlocks(chatClientProvider
+                .getObject().prompt()
                 .system(systemInstructions)
                 .user(prompt)
                 .call()

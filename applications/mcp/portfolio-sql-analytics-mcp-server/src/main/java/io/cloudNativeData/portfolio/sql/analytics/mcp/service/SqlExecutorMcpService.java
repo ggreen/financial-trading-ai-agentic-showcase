@@ -3,6 +3,7 @@ package io.cloudNativeData.portfolio.sql.analytics.mcp.service;
 import io.cloudNativeData.trading.analytics.PortfolioQueryRequests;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,7 +39,7 @@ payload-> 'tradeRecommendation' -> 'stockNewsAnalysis' ->> 'rawNews' rawNews
   */
 
 @Service
-@RestController
+//@RestController
 @Slf4j
 @RequiredArgsConstructor
 public class SqlExecutorMcpService {
@@ -50,7 +51,7 @@ public class SqlExecutorMcpService {
      * This annotation registers the method as an MCP tool available to the client.
      */
     @Tool(description = "Converts natural language text into a SQL query, executes it against the database, and returns the results.")
-    @PostMapping
+//    @PostMapping
     public PortfolioQueryRequests executeTextAsSql(@RequestBody String textPrompt) {
 
         // 1. Generate the SQL from the text prompt using an LLM

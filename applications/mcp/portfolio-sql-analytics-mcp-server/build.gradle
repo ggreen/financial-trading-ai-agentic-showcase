@@ -28,6 +28,8 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
 	implementation 'org.springframework.ai:spring-ai-vector-store-advisor'
+//	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webflux'
+	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
