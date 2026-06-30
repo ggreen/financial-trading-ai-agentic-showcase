@@ -1,7 +1,8 @@
 package io.cloudNativeData.portfolio.agent.controller;
 
-import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
+import io.cloudNativeData.portfolio.agent.service.PortfolioService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
+import io.cloudNativeData.trading.analytics.PortfolioQueryRequests;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PortfolioController {
 
-    private final ProposeTradeService service;
+    private final PortfolioService service;
 
     @GetMapping("proposals")
     public Iterable<PortfolioTradeProposal> getTradeActiveProposals() {
@@ -30,5 +31,11 @@ public class PortfolioController {
 
         service.rejectTradeProposalById(id);
 
+    }
+
+    @PostMapping
+    @RequestMapping("ask/analytics")
+    public PortfolioQueryRequests askAnalytics(@RequestBody String question) {
+        return service.askAnalytics(question);
     }
 }

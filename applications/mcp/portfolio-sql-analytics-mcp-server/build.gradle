@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.1.0'
+	id 'org.springframework.boot' version '4.0.6'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -18,18 +18,18 @@ repositories {
 }
 
 ext {
-	set('springAiVersion', "2.0.0")
+	set('springAiVersion', "2.0.0-M8")
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
-	implementation 'org.springframework.ai:spring-ai-starter-mcp-server'
+//	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+//	implementation 'org.springframework.ai:spring-ai-starter-mcp-server'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
-	implementation 'org.springframework.ai:spring-ai-vector-store-advisor'
+//	implementation 'org.springframework.ai:spring-ai-vector-store-advisor'
 //	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webflux'
-	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
+//	implementation 'org.springframework.ai:spring-ai-starter-mcp-server-webmvc'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'

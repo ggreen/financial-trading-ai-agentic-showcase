@@ -8,6 +8,7 @@ import io.cloudNativeData.trading.MarketSentiment;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.ProposalStatus;
 import io.cloudNativeData.trading.TradeRecommendation;
+import io.cloudNativeData.trading.analytics.PortfolioQueryRequests;
 import io.cloudNativeData.trading.risk.TradeRiskParameters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,12 @@ import java.math.RoundingMode;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProposeTradeService {
+public class PortfolioService {
     private final QueryPortfolioRepository repository;
     private final RiskInference riskInference;
     private final PortfolioTradeRepository tradeRepository;
     private final Converter<PortfolioTradeProposal, PortfolioTradeEntity> portfolioTradeProposalToEntity;
-
+    private final PortfolioAnalyticsService analyticsService;
 
     /**
      *
@@ -223,5 +224,11 @@ public class ProposeTradeService {
 
         tradeRepository.save(entity);
         log.info("Trade proposal {} successfully accepted.", id);
+    }
+
+
+
+    public PortfolioQueryRequests askAnalytics(String question) {
+        return analyticsService.askAnalytics(question);
     }
 }

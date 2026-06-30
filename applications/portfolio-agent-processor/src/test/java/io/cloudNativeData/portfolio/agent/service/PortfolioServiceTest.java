@@ -5,8 +5,10 @@ import io.cloudNativeData.portfolio.agent.repository.PortfolioTradeRepository;
 import io.cloudNativeData.portfolio.agent.repository.QueryPortfolioRepository;
 import io.cloudNativeData.portfolio.agent.repository.entities.PortfolioTradeEntity;
 import io.cloudNativeData.trading.*;
+import io.cloudNativeData.trading.analytics.PortfolioQueryRequests;
 import io.cloudNativeData.trading.risk.TradeRiskParameters;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,14 +22,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProposeTradeServiceTest {
+class PortfolioServiceTest {
 
-    private ProposeTradeService subject;
+    private PortfolioService subject;
 
     @Mock
     private QueryPortfolioRepository queryPortfolioRepository;
@@ -55,12 +59,14 @@ class ProposeTradeServiceTest {
     private final BigDecimal newsConfidence = BigDecimal.valueOf(0.85);
     private final static Integer maxSellLimit = 500;
     private final static Integer baseSellQuantity = 50;
+    @Mock
+    private PortfolioAnalyticsService analyticsService;
 
     @BeforeEach
     void setUp() {
         tradeRecommendation = JavaBeanGeneratorCreator.of(TradeRecommendation.class).create();
 
-        subject = new ProposeTradeService(queryPortfolioRepository,riskInference,portfolioTradeRepository, converter);
+        subject = new PortfolioService(queryPortfolioRepository,riskInference,portfolioTradeRepository, converter, analyticsService);
     }
 
     @Test
@@ -96,6 +102,26 @@ class ProposeTradeServiceTest {
 
         verify(riskInference).predict(any(TradeRiskParameters.class));
         verify(portfolioTradeRepository).save(any());
+    }
+
+    @Test
+    void askAnalytics_shouldReturnPortfolioQueryRequests_whenCalledWithValidQuestion() {
+        // Arrange
+        String question = "What is my tech stock exposure?";
+        PortfolioQueryRequests expectedResponse =  JavaBeanGeneratorCreator.of(PortfolioQueryRequests.class).create();
+        // Optional: Set fields on expectedResponse if needed
+
+        when(analyticsService.askAnalytics(question)).thenReturn(expectedResponse);
+
+        // Act
+        PortfolioQueryRequests actualResponse = subject.askAnalytics(question);
+
+        // Assert
+        assertNotNull(actualResponse, "The response should not be null");
+        assertEquals(expectedResponse, actualResponse, "The returned response should match the mocked service response");
+
+        // Verify that the service was actually called exactly once with the correct parameter
+        verify(analyticsService).askAnalytics(question);
     }
 
     @Test

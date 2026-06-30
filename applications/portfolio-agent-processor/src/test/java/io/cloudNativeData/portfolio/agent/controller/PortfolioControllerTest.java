@@ -1,7 +1,8 @@
 package io.cloudNativeData.portfolio.agent.controller;
 
-import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
+import io.cloudNativeData.portfolio.agent.service.PortfolioService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
+import io.cloudNativeData.trading.analytics.PortfolioQueryRequests;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,21 +23,22 @@ import static org.mockito.Mockito.when;
 class PortfolioControllerTest {
 
     private PortfolioController subject;
+
     @Mock
-    private ProposeTradeService repository;
+    private PortfolioService service;
     private final PortfolioTradeProposal proposal = JavaBeanGeneratorCreator.of(PortfolioTradeProposal.class)
             .create();
 
     @BeforeEach
     void setUp() {
-        subject = new PortfolioController(repository);
+        subject = new PortfolioController(service);
     }
 
     @Test
     void selectPortfolios() {
         var expected  = List.of(proposal);
 
-        when(repository.findActiveTradeProposals()).thenReturn(expected);
+        when(service.findActiveTradeProposals()).thenReturn(expected);
 
         var actual = subject.getTradeActiveProposals();
 
@@ -50,7 +52,7 @@ class PortfolioControllerTest {
 
         subject.acceptTradeProposal(proposal.getId());
 
-        verify(repository).acceptTradeProposalById(anyString());
+        verify(service).acceptTradeProposalById(anyString());
     }
 
 
@@ -59,6 +61,20 @@ class PortfolioControllerTest {
 
         subject.rejectTradeProposal(proposal.getId());
 
-        verify(repository).rejectTradeProposalById(anyString());
+        verify(service).rejectTradeProposalById(anyString());
+    }
+
+
+    @Test
+    void askQuestion() {
+        var question = "What is the meaning of life";
+
+        var expected = JavaBeanGeneratorCreator.of(PortfolioQueryRequests.class).create();
+
+        when(service.askAnalytics(anyString())).thenReturn(expected);
+
+        var actual = subject.askAnalytics(question);
+
+        assertThat(actual).isEqualTo(expected);
     }
 }

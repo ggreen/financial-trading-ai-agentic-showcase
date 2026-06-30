@@ -1,6 +1,6 @@
 package io.cloudNativeData.portfolio.agent.function;
 
-import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
+import io.cloudNativeData.portfolio.agent.service.PortfolioService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeRecommendation;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +19,7 @@ class ProposeTradeFunctionTest {
     private ProposeTradeFunction subject;
 
     @Mock
-    private ProposeTradeService service;
+    private PortfolioService service;
 
     @Mock
     private TradeRecommendation tradeRecommendation;

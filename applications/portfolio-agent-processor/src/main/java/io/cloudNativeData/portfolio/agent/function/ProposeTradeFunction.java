@@ -1,6 +1,6 @@
 package io.cloudNativeData.portfolio.agent.function;
 
-import io.cloudNativeData.portfolio.agent.service.ProposeTradeService;
+import io.cloudNativeData.portfolio.agent.service.PortfolioService;
 import io.cloudNativeData.trading.PortfolioTradeProposal;
 import io.cloudNativeData.trading.TradeRecommendation;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ProposeTradeFunction implements Function<TradeRecommendation, PortfolioTradeProposal> {
 
-    private final ProposeTradeService service;
+    private final PortfolioService service;
 
     @Override
     public PortfolioTradeProposal apply(TradeRecommendation tradeRecommendation) {
