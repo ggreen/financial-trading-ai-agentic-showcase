@@ -28,6 +28,8 @@ public class StockNewsController {
         return stockNewsAnalysis;
     }
 
+
+
     @GetMapping
     public Iterable<StockNewsAnalysis> findAll() {
         return this.service.findAllNews();

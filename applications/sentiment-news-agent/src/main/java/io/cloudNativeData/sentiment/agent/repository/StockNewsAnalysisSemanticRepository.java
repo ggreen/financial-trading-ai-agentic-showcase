@@ -31,7 +31,7 @@ public class StockNewsAnalysisSemanticRepository {
     public Optional<StockPrediction> findStockPredictionByRawNews(String rawNews) {
 
         // 1. Build the similarity search request
-        var searchRequest = SearchRequest.builder()
+        var searchRequest  = SearchRequest.builder()
                 .query(rawNews)
                 .topK(1) // We only care about the best match
                 .similarityThreshold(similarityThreshold)

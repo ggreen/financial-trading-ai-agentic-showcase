@@ -58,9 +58,12 @@
           formSubmitting: false,
           postResult: null,
 
-          /* Form Input Controls - Add Context */
+          /* Form Input Controls - Append Domain Context */
           isAddContextOpen: false,
-          formContextText: '',
+          formRawNews: '',
+          formMarketSentiment: 'BULLISH',
+          formSentimentConfidence: 0,
+          formNewsSummary: '',
           contextSubmitting: false,
           contextSuccessMessage: '',
 
@@ -118,7 +121,10 @@
           },
 
           openAddContext() {
-              this.formContextText = '';
+              this.formRawNews = '';
+              this.formMarketSentiment = 'BULLISH';
+              this.formSentimentConfidence = 0;
+              this.formNewsSummary = '';
               this.contextSuccessMessage = '';
               this.isAddContextOpen = true;
           },
@@ -164,26 +170,37 @@
           },
 
           async submitContext() {
-              if(!this.formContextText.trim()) {
-                  alert('Please provide clean contextual text mapping conditions.');
+              if(!this.formRawNews.trim()) {
+                  alert('Please provide valid Raw News configuration text.');
                   return;
               }
 
               this.contextSubmitting = true;
               this.contextSuccessMessage = '';
               try {
+                  const payload = {
+                      rawNews: this.formRawNews.trim(),
+                      stockPrediction: {
+                          marketSentiment: this.formMarketSentiment,
+                          sentimentConfidence: parseFloat(this.formSentimentConfidence) || 0,
+                          newsSummary: this.formNewsSummary.trim()
+                      }
+                  };
+
                   const response = await fetch('/functions/newsDomainContextSink', {
                       method: 'POST',
                       headers: {
                           'accept': '*/*',
                           'Content-Type': 'application/json'
                       },
-                      body: JSON.stringify(this.formContextText.trim())
+                      body: JSON.stringify(payload)
                   });
 
                   if (!response.ok) throw new Error('Domain matrix rules execution failure.');
                   this.contextSuccessMessage = 'Domain operational context applied successfully across functional pipelines.';
-                  this.formContextText = '';
+                  this.formRawNews = '';
+                  this.formNewsSummary = '';
+                  this.formSentimentConfidence = 0;
               } catch (err) {
                   alert('Error deploying contextual functional data stream.');
                   console.error(err);
@@ -221,7 +238,7 @@
                     @click="openAddContext()"
                     class="bg-transparent hover:bg-tanzuBorder text-sky-400 border border-sky-500/40 font-semibold text-sm px-4 py-2 rounded-lg transition-all duration-150 flex items-center space-x-2"
             >
-                <span>⚙ Add Context</span>
+                <span>⚙ Append Domain Context</span>
             </button>
 
             <button
@@ -507,14 +524,51 @@
                     </div>
                 </template>
 
-                <div>
-                    <label class="block text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2 mono">Rule / Evaluation Logic Context Box</label>
-                    <textarea
-                            x-model="formContextText"
-                            rows="4"
-                            placeholder="e.g. When there is Bad news then MarketSentiment is Bearish"
-                            class="w-full bg-tanzuBg border border-tanzuBorder rounded-lg p-4 text-white placeholder-slate-600 font-light text-sm focus:outline-none focus:border-sky-400 transition resize-none leading-relaxed"
-                    ></textarea>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2 mono">Raw News Context</label>
+                        <textarea
+                                x-model="formRawNews"
+                                rows="3"
+                                placeholder="Incorporate specific market updates or raw analytical parameters..."
+                                class="w-full bg-tanzuBg border border-tanzuBorder rounded-lg p-4 text-white placeholder-slate-600 font-light text-sm focus:outline-none focus:border-sky-400 transition resize-none leading-relaxed"
+                        ></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2 mono">Market Sentiment</label>
+                            <select
+                                    x-model="formMarketSentiment"
+                                    class="w-full bg-tanzuBg border border-tanzuBorder text-white text-sm font-medium rounded-lg p-2.5 focus:outline-none focus:border-sky-400 cursor-pointer transition"
+                            >
+                                <option value="BULLISH">BULLISH</option>
+                                <option value="BEARISH">BEARISH</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2 mono">Sentiment Confidence (0.00 - 1.00)</label>
+                            <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="1"
+                                    x-model="formSentimentConfidence"
+                                    placeholder="e.g. 0.85"
+                                    class="w-full bg-tanzuBg border border-tanzuBorder rounded-lg p-2.5 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-sky-400 transition mono"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] uppercase tracking-widest font-bold text-slate-400 mb-2 mono">News Summary Abstract</label>
+                        <input
+                                type="text"
+                                x-model="formNewsSummary"
+                                placeholder="Summary context text layout matching structural rules..."
+                                class="w-full bg-tanzuBg border border-tanzuBorder rounded-lg p-2.5 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-sky-400 transition"
+                        />
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 pt-2">
