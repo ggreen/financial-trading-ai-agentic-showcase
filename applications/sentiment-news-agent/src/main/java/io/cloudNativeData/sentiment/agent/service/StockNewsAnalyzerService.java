@@ -35,7 +35,6 @@ public class StockNewsAnalyzerService {
         var prediction = semanticRepository.findStockPredictionByRawNews(newsParameters.rawNews())
                 .orElse(null);
 
-
         if(prediction == null)
         {
             log.info("No semantic query found, performing inference");

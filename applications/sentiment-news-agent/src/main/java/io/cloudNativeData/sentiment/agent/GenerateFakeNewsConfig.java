@@ -1,11 +1,17 @@
 package io.cloudNativeData.sentiment.agent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudNativeData.trading.news.NewsParameters;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.util.Digits;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.MimeTypeUtils;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -23,7 +29,7 @@ public class GenerateFakeNewsConfig {
             """;
 
     @Bean
-    Supplier<NewsParameters> generateNews(ChatClient.Builder builder){
+    Supplier<Message<String>> generateNews(ChatClient.Builder builder, JsonMapper jsonMapper) {
 
         return () -> {
             var index = digits.generateInteger(0, stocks.length - 1);
@@ -40,8 +46,14 @@ public class GenerateFakeNewsConfig {
                     .call()
                     .content();
 
+
             log.info("News information for stock: {}, industry: {} is {}", stock, industry,rawNews);
-            return NewsParameters.builder().rawNews(rawNews).stockTicker(stock).build();
+            var payload = NewsParameters.builder().rawNews(rawNews).stockTicker(stock).build();
+
+            return MessageBuilder
+                    .withPayload(jsonMapper.writeValueAsString(payload))
+                    .setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
+                    .build();
         };
     }
 }
