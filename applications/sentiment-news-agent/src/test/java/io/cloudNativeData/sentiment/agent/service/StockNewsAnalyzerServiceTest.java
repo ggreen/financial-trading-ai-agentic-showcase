@@ -2,6 +2,7 @@ package io.cloudNativeData.sentiment.agent.service;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisRepository;
+import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisSemanticRepository;
 import io.cloudNativeData.trading.StockPrediction;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
@@ -31,13 +32,20 @@ class StockNewsAnalyzerServiceTest {
     @Mock
     private StockNewsAnalysisRepository stockNewsAnalysisRepository;
 
+    @Mock
+    private StockNewsAnalysisSemanticRepository stockNewsAnalysisSemanticRepository;
+
+
+    @Mock
+    private StockNewsAnalysisSemanticRepository sentimentRepository;
+
+    private final StockNewsAnalysis stockNewsAnalysis = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
 
     private StockNewsAnalyzerService subject;
-    private final StockNewsAnalysis stockNewsAnalysis = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
 
     @BeforeEach
     void setUp() {
-        subject = new StockNewsAnalyzerService(inference,stockNewsAnalysisRepository);
+        subject = new StockNewsAnalyzerService(inference,stockNewsAnalysisRepository, sentimentRepository);
     }
 
     @Test

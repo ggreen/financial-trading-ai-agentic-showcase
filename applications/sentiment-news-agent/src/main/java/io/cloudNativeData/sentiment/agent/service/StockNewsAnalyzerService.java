@@ -2,6 +2,7 @@ package io.cloudNativeData.sentiment.agent.service;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisRepository;
+import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisSemanticRepository;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class StockNewsAnalyzerService {
 
     private final StockAnalysisInference inference;
     private final StockNewsAnalysisRepository stockNewsAnalysisRepository;
+    private  final StockNewsAnalysisSemanticRepository semanticRepository;
 
     /**
      * The analyzed news
@@ -26,7 +28,19 @@ public class StockNewsAnalyzerService {
      * @return the new analysis
      */
     public StockNewsAnalysis analyze(NewsParameters newsParameters) {
-        var prediction =  inference.infer(newsParameters);
+
+        log.info("Analyzing stock news information : " + newsParameters);
+
+        log.info("Doing semantic query");
+        var prediction = semanticRepository.findStockPredictionByRawNews(newsParameters.rawNews())
+                .orElse(null);
+
+
+        if(prediction == null)
+        {
+            log.info("No semantic query found, performing inference");
+            prediction =  inference.infer(newsParameters);
+        }
 
         log.info("prediction = {}", prediction);
 
