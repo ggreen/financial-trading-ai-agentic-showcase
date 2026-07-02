@@ -1,5 +1,6 @@
 package io.cloudNativeData.stock.price;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,10 +14,16 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 
 @SpringBootApplication
+@Slf4j
 public class StockPriceApplication {
 
 
 	public static void main(String[] args) {
+
+		log.info("App start: properties:{},  args: {}\n env: {}",System.getProperties(),
+				args,System.getenv());
+
+
 		SpringApplication.run(StockPriceApplication.class, args);
 	}
 

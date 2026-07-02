@@ -5,6 +5,7 @@ import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisRepository
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StockNewsAnalyzerService {
 
     private final StockAnalysisInference inference;
@@ -26,13 +28,18 @@ public class StockNewsAnalyzerService {
     public StockNewsAnalysis analyze(NewsParameters newsParameters) {
         var prediction =  inference.infer(newsParameters);
 
+        log.info("prediction = {}", prediction);
+
         var stockNewsAnalysis = StockNewsAnalysis.builder()
                 .stockPrediction(prediction)
                 .id(newsParameters.stockTicker())
                 .ticker(newsParameters.stockTicker())
                 .rawNews(newsParameters.rawNews()).build();
 
+
             stockNewsAnalysisRepository.save(stockNewsAnalysis);
+
+        log.info("Saved stockNewsAnalysis = {}", stockNewsAnalysis);
 
             return stockNewsAnalysis;
     }

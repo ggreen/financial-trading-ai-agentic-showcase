@@ -23,7 +23,8 @@ class StockPriceDtoToStockDailyPriceConverterTest {
     @Test
     void convert() {
 
-        dto.setUpdated(System.currentTimeMillis());
+        var now = System.currentTimeMillis();
+        dto.setUpdated(now);
 
         String dateText = Text.format().formatDate("yyyy-MM-dd",new Date(dto.getUpdated()));
 
@@ -33,8 +34,8 @@ class StockPriceDtoToStockDailyPriceConverterTest {
                 .ticker(dto.getTicker())
                 .volume(dto.getVolume())
                 .closePrice(BigDecimal.valueOf(dto.getPrice()))
-                .priceDate(Instant.ofEpochMilli(System.currentTimeMillis())
-                        .atZone(ZoneId.of("UTC")).toLocalDate())
+                .priceDate(Instant.ofEpochMilli(now)
+                        .atZone(ZoneId.systemDefault()).toLocalDate())
                 .build();
 
         var actual = subject.convert(dto);

@@ -13,7 +13,7 @@ public class StockPriceController {
     private final WebClient webClient;
 
     public StockPriceController(WebClient.Builder webClientBuilder,
-                                 @Value("${API_NINJAS_KEY}") String apiKey) {
+                                 @Value("${LC_API_NINJAS_KEY}") String apiKey) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.api-ninjas.com/v1")
                 .defaultHeader("X-Api-Key", apiKey)

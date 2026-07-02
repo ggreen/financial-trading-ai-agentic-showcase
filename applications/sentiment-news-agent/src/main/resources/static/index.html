@@ -141,7 +141,7 @@
 
               this.formSubmitting = true;
               try {
-                  const response = await fetch('http://localhost:8200/stocks', {
+                  const response = await fetch('/stocks', {
                       method: 'POST',
                       headers: {
                           'accept': '*/*',
@@ -172,7 +172,7 @@
               this.contextSubmitting = true;
               this.contextSuccessMessage = '';
               try {
-                  const response = await fetch('http://localhost:8200/functions/newsDomainContextSink', {
+                  const response = await fetch('/functions/newsDomainContextSink', {
                       method: 'POST',
                       headers: {
                           'accept': '*/*',
