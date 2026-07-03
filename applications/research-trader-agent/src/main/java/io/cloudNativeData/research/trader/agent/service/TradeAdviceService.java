@@ -68,7 +68,7 @@ public class TradeAdviceService {
 
         if(tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction()))
         {
-            log.info("NA action for {}, so return null", stockPrice);
+            log.info("NA action for {}, so return null", tradePrediction);
             return null;
         }
 
