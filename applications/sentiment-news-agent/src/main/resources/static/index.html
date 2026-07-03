@@ -179,7 +179,7 @@
               this.contextSuccessMessage = '';
               try {
                   const payload = {
-                      rawNews: this.formRawNews.trim(),
+                      id: this.formRawNews.trim(),
                       stockPrediction: {
                           marketSentiment: this.formMarketSentiment,
                           sentimentConfidence: parseFloat(this.formSentimentConfidence) || 0,

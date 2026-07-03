@@ -12,6 +12,16 @@ TICKER=ACME-CAR
 NEWS=Recently we have heard news of stock manipulation by this company.
 
 
+Add Context
+
+```properties
+context=stock manipulation is BEARISH
+sumamry=Stock Manipulation: Corporation Leadership Trust Concerns
+
+```
+
+
+
 ```properties
 deployer.research-trader-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.default.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.input.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.output.consumer.containerType=stream
 deployer.portfolio-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.default.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.input.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.output.consumer.containerType=stream
