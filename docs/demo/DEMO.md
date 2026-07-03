@@ -17,10 +17,24 @@ Add Context
 ```properties
 context=stock manipulation is BEARISH
 sumamry=Stock Manipulation: Corporation Leadership Trust Concerns
-
 ```
 
+```properties
+name=ACME-HOSPITAL
+NEWS=Doctors are making up phony results that is a trust concern 
+```
 
+```properties
+name=ACME-TAX
+NEWS=Tax preparer are providing fake and false results
+```
+
+Add Context 
+
+```properties
+NEWS=fake false results
+summary=Fraud Manipulation: Corporation Trust Concerns
+```
 
 ```properties
 deployer.research-trader-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.default.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.input.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.output.consumer.containerType=stream

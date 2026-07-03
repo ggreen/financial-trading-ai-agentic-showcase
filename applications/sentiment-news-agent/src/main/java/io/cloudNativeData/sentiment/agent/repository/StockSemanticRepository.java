@@ -22,7 +22,7 @@ public class StockSemanticRepository {
     private final NewsContextRepository newsContextRepository;
 
     public StockSemanticRepository(VectorStore vectorStore,
-                                   @Value("${app.stock.news.analysisa.semantic.repository.similarityThreshold:0.85}")double similarityThreshold,
+                                   @Value("${app.stock.news.analysisa.semantic.repository.similarityThreshold:0.75}")double similarityThreshold,
                                     NewsContextRepository newsContextRepository) {
         this.vectorStore = vectorStore;
         this.similarityThreshold = similarityThreshold;
