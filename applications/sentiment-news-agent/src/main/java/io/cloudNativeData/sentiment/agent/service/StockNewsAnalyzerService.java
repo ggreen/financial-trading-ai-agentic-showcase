@@ -2,7 +2,8 @@ package io.cloudNativeData.sentiment.agent.service;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisRepository;
-import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisSemanticRepository;
+import io.cloudNativeData.sentiment.agent.repository.StockSemanticRepository;
+import io.cloudNativeData.trading.news.NewsContext;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,11 @@ public class StockNewsAnalyzerService {
 
     private final StockAnalysisInference inference;
     private final StockNewsAnalysisRepository stockNewsAnalysisRepository;
-    private  final StockNewsAnalysisSemanticRepository semanticRepository;
+    private final StockSemanticRepository semanticRepository;
 
     /**
      * The analyzed news
+     *
      * @param newsParameters the news parameters
      * @return the new analysis
      */
@@ -35,10 +37,9 @@ public class StockNewsAnalyzerService {
         var prediction = semanticRepository.findStockPredictionByRawNews(newsParameters.rawNews())
                 .orElse(null);
 
-        if(prediction == null)
-        {
+        if (prediction == null) {
             log.info("No semantic query found, performing inference");
-            prediction =  inference.infer(newsParameters);
+            prediction = inference.infer(newsParameters);
         }
 
         log.info("prediction = {}", prediction);
@@ -50,11 +51,11 @@ public class StockNewsAnalyzerService {
                 .rawNews(newsParameters.rawNews()).build();
 
 
-            stockNewsAnalysisRepository.save(stockNewsAnalysis);
+        stockNewsAnalysisRepository.save(stockNewsAnalysis);
 
         log.info("Saved stockNewsAnalysis = {}", stockNewsAnalysis);
 
-            return stockNewsAnalysis;
+        return stockNewsAnalysis;
     }
 
 
@@ -65,5 +66,10 @@ public class StockNewsAnalyzerService {
         return newsList.stream()
                 .sorted(Comparator.comparing(StockNewsAnalysis::getTicker))
                 .collect(Collectors.toList());
+    }
+
+    public void saveNewsContext(NewsContext newsContext) {
+
+        semanticRepository.saveNewsContext(newsContext);
     }
 }

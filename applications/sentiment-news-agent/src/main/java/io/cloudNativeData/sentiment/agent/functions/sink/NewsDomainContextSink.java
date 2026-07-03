@@ -1,5 +1,6 @@
 package io.cloudNativeData.sentiment.agent.functions.sink;
 
+import io.cloudNativeData.sentiment.agent.service.StockNewsAnalyzerService;
 import io.cloudNativeData.trading.news.NewsContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +17,14 @@ import java.util.function.Consumer;
 @Slf4j
 public class NewsDomainContextSink implements Consumer<NewsContext> {
 
-    private final VectorStore vectorStore;
-    private final Converter<NewsContext,List<Document>> converter;
-
+    private final StockNewsAnalyzerService stockNewsAnalyzerService;
 
     @Override
     public void accept(NewsContext newsContext) {
 
+        log.info("Adding News Domain Context: {}", newsContext);
 
-        vectorStore.add(converter.convert(newsContext));
+        stockNewsAnalyzerService.saveNewsContext(newsContext);
 
-        log.info("Added News Domain Context: {}", newsContext);
     }
 }

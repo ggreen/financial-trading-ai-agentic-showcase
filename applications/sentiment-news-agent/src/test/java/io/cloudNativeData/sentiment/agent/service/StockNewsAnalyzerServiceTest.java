@@ -1,9 +1,11 @@
 package io.cloudNativeData.sentiment.agent.service;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
+import io.cloudNativeData.sentiment.agent.repository.NewsContextRepository;
 import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisRepository;
-import io.cloudNativeData.sentiment.agent.repository.StockNewsAnalysisSemanticRepository;
+import io.cloudNativeData.sentiment.agent.repository.StockSemanticRepository;
 import io.cloudNativeData.trading.StockPrediction;
+import io.cloudNativeData.trading.news.NewsContext;
 import io.cloudNativeData.trading.news.NewsParameters;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
@@ -35,12 +37,13 @@ class StockNewsAnalyzerServiceTest {
     @Mock
     private StockNewsAnalysisRepository stockNewsAnalysisRepository;
 
+
     @Mock
-    private StockNewsAnalysisSemanticRepository stockNewsAnalysisSemanticRepository;
+    private NewsContextRepository newsContextRepository;
 
 
     @Mock
-    private StockNewsAnalysisSemanticRepository semanticRepository;
+    private StockSemanticRepository semanticRepository;
 
     private final StockNewsAnalysis stockNewsAnalysis = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
 
@@ -150,5 +153,22 @@ class StockNewsAnalyzerServiceTest {
         assertThat(iterator.next()).isEqualTo(news1);
     }
 
+
+    @Test
+    @DisplayName("Should successfully save raw news to VectorStore and context to NewsContextRepository")
+    void testSaveNewsContext_SavesToVectorStoreAndRepository() {
+        // Arrange
+        var sampleRawNews = "Apple launches revolutionary AI features in 2026.";
+        var mockNewsContext = NewsContext.builder()
+                .id(sampleRawNews)
+                .build();
+
+        // Act
+        subject.saveNewsContext(mockNewsContext);
+
+
+        verify(this.semanticRepository).saveNewsContext(any(NewsContext.class));
+
+    }
 
 }

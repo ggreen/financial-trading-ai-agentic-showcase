@@ -1,44 +1,53 @@
 package io.cloudNativeData.sentiment.agent.repository;
 
 import io.cloudNativeData.trading.StockPrediction;
+import io.cloudNativeData.trading.news.NewsContext;
+import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.core.convert.converter.Converter;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class StockNewsAnalysisSemanticRepositoryTest {
+class StockSemanticRepositoryTest {
+
 
     @Mock
     private VectorStore vectorStore;
 
     @Mock
-    private Converter<Document, StockPrediction> converter;
+    private NewsContextRepository newsContextRepository;
 
-    private StockNewsAnalysisSemanticRepository subject;
+    private StockSemanticRepository subject;
+    // Given
+    private final NewsContext mockNewsContext = JavaBeanGeneratorCreator.of(NewsContext.class).create();
 
     private final double configuredThreshold = 0.82;
     private final String sampleRawNews = "Apple stock surges after introducing groundbreaking AI ecosystem.";
+    @Mock
+    private Document mockDocument;
+
 
     @BeforeEach
     void setUp() {
-        subject = new StockNewsAnalysisSemanticRepository(vectorStore, configuredThreshold, converter);
+        subject = new StockSemanticRepository(vectorStore,
+                configuredThreshold,
+                newsContextRepository);
     }
 
     @Test
@@ -50,27 +59,15 @@ class StockNewsAnalysisSemanticRepositoryTest {
 
         when(vectorStore.similaritySearch(any(SearchRequest.class)))
                 .thenReturn(List.of(matchedDocument));
-        when(converter.convert(matchedDocument))
-                .thenReturn(expectedPrediction);
+
+        when(this.newsContextRepository.findById(anyString())).thenReturn(Optional.of(mockNewsContext));
 
         // When
-        Optional<StockPrediction> result = subject.findStockPredictionByRawNews(sampleRawNews);
+        Optional<StockPrediction> actual = subject.findStockPredictionByRawNews(sampleRawNews);
 
-        // Then
-        assertTrue(result.isPresent(), "Result should contain a StockPrediction");
-        assertEquals(expectedPrediction, result.get());
 
-        // Verify SearchRequest parameters via ArgumentCaptor
-        ArgumentCaptor<SearchRequest> searchRequestCaptor = ArgumentCaptor.forClass(SearchRequest.class);
-        verify(vectorStore, times(1)).similaritySearch(searchRequestCaptor.capture());
+        assertThat(actual).isEqualTo(Optional.of(mockNewsContext.getStockPrediction()));
 
-        SearchRequest capturedRequest = searchRequestCaptor.getValue();
-        assertEquals(sampleRawNews, capturedRequest.getQuery(), "Query should match incoming raw text");
-        assertEquals(1, capturedRequest.getTopK(), "TopK should strictly be 1");
-        assertEquals(configuredThreshold, capturedRequest.getSimilarityThreshold(), "Should use injected similarity threshold");
-
-        // Verify conversion logic was triggered for the matching document
-        verify(converter, times(1)).convert(matchedDocument);
     }
 
     @Test
@@ -87,7 +84,20 @@ class StockNewsAnalysisSemanticRepositoryTest {
         // Then
         assertFalse(result.isPresent(), "Result should be empty when vector store yields no results");
 
-        // Verify converter was never interacted with since no document exists
-        verifyNoInteractions(converter);
+    }
+
+    @Test
+    @DisplayName("Should successfully convert and save NewsContext to VectorStore")
+    void saveNewsContext_ShouldSaveSuccessfully() {
+
+        // When
+        subject.saveNewsContext(mockNewsContext);
+
+        // Then
+        // Verify that vectorStore.accept() was called exactly once
+        verify(vectorStore).add(any());
+
+        verify(newsContextRepository).save(any());
+
     }
 }

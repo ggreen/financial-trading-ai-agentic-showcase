@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.document.Document;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,14 +17,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class NewsContentToDocumentsConverterTest {
+class NewsContextToDocumentsConverterTest {
 
     // Assuming your class is named NewsContextConverter
-    private NewsContentToDocumentsConverter converter;
+    private NewsContextToDocumentsConverter converter;
 
     private final String configuredModelName = "semantic";
 
@@ -35,13 +33,11 @@ class NewsContentToDocumentsConverterTest {
     @Mock
     private StockPrediction stockPrediction;
 
-    @Mock
-    private JsonMapper jsonMapper;
 
     @BeforeEach
     void setUp() {
         // Injecting the modelName into the converter instance
-        converter = new NewsContentToDocumentsConverter(configuredModelName,jsonMapper);
+        converter = new NewsContextToDocumentsConverter(configuredModelName);
     }
 
     @Test
@@ -52,8 +48,7 @@ class NewsContentToDocumentsConverterTest {
         var summaryText = "Tech stocks rally on strong Q3 earnings.";
         var sentiment = MarketSentiment.BULLISH;
         var confidence = new BigDecimal("0.945");
-
-        when(jsonMapper.writeValueAsString(any())).thenReturn(rawNewsText);
+        when(newsContext.getId()).thenReturn(rawNewsText);
 
         // When
         List<Document> result = converter.convert(newsContext);
