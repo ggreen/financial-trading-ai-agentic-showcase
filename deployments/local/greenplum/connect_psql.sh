@@ -1,0 +1,1 @@
+PGPASSWORD=$GREENPLUM_PASSWORD  psql -h localhost -p 5432 -U $GREENPLUM_USER   -d postgres
