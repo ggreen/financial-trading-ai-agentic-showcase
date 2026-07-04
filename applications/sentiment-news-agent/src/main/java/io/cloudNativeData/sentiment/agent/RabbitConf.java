@@ -17,10 +17,10 @@ import org.springframework.rabbit.stream.support.StreamAdmin;
 @Slf4j
 public class RabbitConf {
 
-    @Value("${spring.cloud.stream.bindings.input.destination}")
-    private String outboundNewsStream;
-
-    @Value("${spring.cloud.stream.bindings.output.destination}")
+//    @Value("${spring.cloud.stream.bindings.input.destination}")
+//    private String outboundNewsStream;
+//
+    @Value("${spring.cloud.stream.bindings.output.destination:amq.topic}")
     private String stockNewsAnalysisExchange;
 
 
@@ -31,12 +31,17 @@ public class RabbitConf {
 
 
 
-    @Bean
+//    @Bean
     StreamAdmin streamAdmin(Environment env) {
-        log.info("Declaring stream: {}", outboundNewsStream);
+
 
         return new StreamAdmin(env, sc -> {
-            sc.stream(outboundNewsStream).create();
+
+//            log.info("Declaring stream: {}", outboundNewsStream);
+//            sc.stream(outboundNewsStream).create();
+//
+//            log.info("Declaring stream: {}", stockNewsAnalysisExchange);
+//            sc.stream(stockNewsAnalysisExchange).create();
         });
     }
 
