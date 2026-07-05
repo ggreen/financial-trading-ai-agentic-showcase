@@ -12,20 +12,22 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @Component
 @Slf4j
-public class SellStockListener extends CqListenerAdapter implements ContinuousQueryListener {
+public class BuyStockListener extends CqListenerAdapter implements ContinuousQueryListener {
     private final ResearchTraderService researchTraderService;
 
     @Override
     public void onEvent(CqEvent cqEvent) {
+
+
         // The Region Key represents the stock ticker (e.g., "AAPL", "TSLA")
 
         if (cqEvent != null && cqEvent.getKey() != null) {
             var ticker = cqEvent.getKey().toString();
 
-            log.info("SELL STOCK listener invoked. Sell stock event received: {}", ticker);
+            log.info("BUY STOCK listener invoked.The stock event received: {}", ticker);
 
             // Invoke the specific service method
-            researchTraderService.recommendSell((StockPriceMovingAverage) cqEvent.getNewValue());
+            researchTraderService.recommendBuy((StockPriceMovingAverage) cqEvent.getNewValue());
         }
     }
 }

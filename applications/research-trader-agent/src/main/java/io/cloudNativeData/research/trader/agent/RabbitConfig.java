@@ -5,6 +5,7 @@ import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.patterns.integration.Publisher;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,10 @@ public class RabbitConfig {
     @Value("${spring.cloud.stream.bindings.suggestTradeAdviceProcessor-out-0.destination}")
     private String tradeRecommendationExchange;
 
-    //private final Publisher<TradeRecommendation> tradeRecommendationPublisher;
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new JacksonJsonMessageConverter();
+    }
 
     @Bean
     Publisher<TradeRecommendation> publisherTradeRecommendation(RabbitTemplate template, MessageConverter messageConverter) {
