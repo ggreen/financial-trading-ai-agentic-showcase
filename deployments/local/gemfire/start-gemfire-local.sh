@@ -13,6 +13,8 @@ $GEMFIRE_HOME/bin/gfsh -e "start server --name=server1-financial-trading --locat
 $GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=AiCache --type=PARTITION --skip-if-exists"
 
 $GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=TradeRecommendation --type=PARTITION --skip-if-exists"
+$GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockPriceMovingAverage --type=PARTITION --skip-if-exists"
+
 
 $GEMFIRE_HOME/bin/gfsh -e "connect" -e "create region --name=StockDailyPrice --type=PARTITION_PERSISTENT"
 

@@ -1,4 +1,4 @@
-package io.cloudNativeData.research.trader.agent.function;
+package io.cloudNativeData.research.trader.agent.functions.processor;
 
 import io.cloudNativeData.research.trader.agent.service.ResearchTraderService;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;

@@ -5,13 +5,13 @@ import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.geode.cache.query.CqEvent;
-import org.apache.geode.cache.util.CqListenerAdapter;
+import org.springframework.data.gemfire.listener.ContinuousQueryListener;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
 @Slf4j
-public class SellStockListener extends CqListenerAdapter {
+public class SellStockListener implements ContinuousQueryListener {
     private final ResearchTraderService researchTraderService;
 
     @Override
