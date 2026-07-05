@@ -1,7 +1,7 @@
-package io.cloudNativeData.research.trader.agent.service.faker;
+package io.cloudNativeData.research.trader.agent.service.stocks.faker;
 
 import io.cloudNativeData.research.trader.agent.properties.StockPriceFakerConfig;
-import io.cloudNativeData.research.trader.agent.service.GetStockFallbackService;
+import io.cloudNativeData.research.trader.agent.service.stocks.GetStockFallbackService;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import nyla.solutions.core.util.Digits;
 import org.springframework.stereotype.Service;

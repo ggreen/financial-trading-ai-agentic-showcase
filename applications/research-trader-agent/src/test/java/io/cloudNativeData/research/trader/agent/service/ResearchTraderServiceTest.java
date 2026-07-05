@@ -4,10 +4,14 @@ import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
+import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
 import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
+import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
+import nyla.solutions.core.patterns.integration.Publisher;
+import org.apache.catalina.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.converter.Converter;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,9 +28,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TradeAdviceServiceTest {
+class ResearchTraderServiceTest {
 
-    private TradeAdviceService subject;
+    private ResearchTraderService subject;
 
     @Mock
     private StockPriceService stockPriceService;
@@ -44,15 +49,24 @@ class TradeAdviceServiceTest {
 
     @Mock
     private Converter<StockPriceDto, StockDailyPrice> dtoToPriceConverter;
+    @Mock
+    private  Publisher<TradeRecommendation> tradeRecommendationPublisher ;
+
 
     private final StockPriceDto dto = JavaBeanGeneratorCreator.of(StockPriceDto.class).create();
     private final StockDailyPrice stockDailyPrice = JavaBeanGeneratorCreator.of(StockDailyPrice.class).create();
     private final BigDecimal price = BigDecimal.TEN;
     private final BigDecimal movingAvg200 = BigDecimal.TEN;
+    private final StockPriceMovingAverage stockPriceMovingAverage= JavaBeanGeneratorCreator.of(StockPriceMovingAverage.class).create();
+    private final TradeRecommendation tradeRecommendation =  JavaBeanGeneratorCreator.of(TradeRecommendation.class).create();
+
 
     @BeforeEach
     void setUp() {
-        subject = new TradeAdviceService(inference, stockPricingExecution, tradeRecommendationRepository,stockPriceService,stockDailyPriceRepository, dtoToPriceConverter);
+        subject = new ResearchTraderService(inference, stockPricingExecution,
+                tradeRecommendationRepository,stockPriceService,stockDailyPriceRepository,
+                dtoToPriceConverter,
+                tradeRecommendationPublisher);
     }
 
     @Test
@@ -183,4 +197,40 @@ class TradeAdviceServiceTest {
         // For NEUTRAL sentiment, adjustment is 0.0. Price should match movingAvg200 exactly (150.00)
         assertThat(actual).isNull();
     }
+
+
+    @Test
+    void testRecommendSell_ShouldFindUpdateSaveAndPublish() {
+
+
+
+        // Stub repository query to simulate returning this entity match
+        when(tradeRecommendationRepository.findById(anyString())).thenReturn(Optional.of(this.tradeRecommendation));
+        when(tradeRecommendationRepository.save(any(TradeRecommendation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When: The CQ listener triggers the target workflow
+        subject.recommendSell(this.stockPriceMovingAverage);
+
+
+        verify(tradeRecommendationRepository, times(1)).findById(anyString());
+        verify(tradeRecommendationRepository, times(1)).save(any(TradeRecommendation.class));
+        verify(tradeRecommendationPublisher).send(any());
+
+
+    }
+
+    @Test
+    void testRecommendSell_WhenRecordNotFound_ShouldGracefullyAbort() {
+        // Given
+        when(tradeRecommendationRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        // When
+        subject.recommendSell(this.stockPriceMovingAverage);
+
+        // Then: Ensure mutations and persistence invocations are skipped completely
+        verify(tradeRecommendationRepository, times(1)).findById(anyString());
+        verify(tradeRecommendationRepository, never()).save(any(TradeRecommendation.class));
+        verify(tradeRecommendationPublisher, never()).send(any());
+    }
+
 }

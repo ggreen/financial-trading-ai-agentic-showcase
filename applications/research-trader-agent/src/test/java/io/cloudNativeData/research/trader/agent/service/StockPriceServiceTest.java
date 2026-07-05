@@ -1,9 +1,10 @@
 package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.properties.StockApiProperties;
+import io.cloudNativeData.research.trader.agent.service.stocks.GetStockFallbackService;
+import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

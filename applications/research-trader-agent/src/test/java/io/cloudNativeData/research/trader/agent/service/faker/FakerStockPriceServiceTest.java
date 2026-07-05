@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader.agent.service.faker;
 
 import io.cloudNativeData.research.trader.agent.properties.StockPriceFakerConfig;
+import io.cloudNativeData.research.trader.agent.service.stocks.faker.FakerStockPriceService;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import org.junit.jupiter.api.BeforeEach;

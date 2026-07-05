@@ -1,4 +1,4 @@
-package io.cloudNativeData.research.trader.agent.service;
+package io.cloudNativeData.research.trader.agent.service.stocks;
 
 import io.cloudNativeData.research.trader.agent.properties.StockApiProperties;
 import io.cloudNativeData.trading.pricing.StockPriceDto;

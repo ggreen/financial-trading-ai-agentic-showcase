@@ -4,11 +4,14 @@ import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
+import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
 import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
+import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nyla.solutions.core.patterns.integration.Publisher;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +20,7 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TradeAdviceService {
+public class ResearchTraderService {
 
     private final TradePredictionInference inference;
     private final StockPricingExecution repository;
@@ -25,14 +28,15 @@ public class TradeAdviceService {
     private final StockPriceService stockPriceService;
     private final StockDailyPriceRepository stockDailyPriceRepository;
     private final Converter<StockPriceDto, StockDailyPrice> dtoToPriceConverter;
+    private final Publisher<TradeRecommendation> tradeRecommendationPublisher;
+    private final static String movingAverageRuleModelName = "rule-movingAverage";
 
 
-    public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis)
-    {
+    public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
 
         var stockPrice = stockPriceService.getCurrentStockPrice(stockNewsAnalysis.getTicker());
 
-        if(stockPrice != null)
+        if (stockPrice != null)
             stockDailyPriceRepository.save(dtoToPriceConverter.convert(stockPrice));
 
         var movingAverage200 = repository
@@ -50,7 +54,7 @@ public class TradeAdviceService {
         var tradePrediction = inference.recommend(summary200);
         log.info("predication: {}", tradePrediction);
 
-        var price = recommendStockPrice(movingAverage200,stockNewsAnalysis.getStockPrediction().getMarketSentiment(),
+        var price = recommendStockPrice(movingAverage200, stockNewsAnalysis.getStockPrediction().getMarketSentiment(),
                 stockNewsAnalysis.getStockPrediction().getSentimentConfidence().doubleValue());
 
 
@@ -66,8 +70,7 @@ public class TradeAdviceService {
 
         tradeRecommendationRepository.save(tradeRecommendation);
 
-        if(tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction()))
-        {
+        if (tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction())) {
             log.info("NA action for {}, so return null", tradePrediction);
             return null;
         }
@@ -77,7 +80,7 @@ public class TradeAdviceService {
 
     private BigDecimal recommendStockPrice(BigDecimal movingAverage200Day, MarketSentiment marketSentiment, double confidence) {
 
-        if(movingAverage200Day == null)
+        if (movingAverage200Day == null)
             return BigDecimal.ZERO;
 
         // Sanity check for confidence bounds
@@ -105,7 +108,7 @@ public class TradeAdviceService {
                 // High confidence maps to the maximum discount
                 yield minDiscount - (confidence * (minDiscount - maxDiscount));
             }
-            case NEUTRAL ->  0.0;
+            case NEUTRAL -> 0.0;
         };
 
         // Calculate final recommended price
@@ -113,5 +116,32 @@ public class TradeAdviceService {
 
         // Round to 2 decimal places for currency format
         return BigDecimal.valueOf(Math.round(recommendedPrice * 100.0) / 100.0);
+    }
+
+    public void recommendSell(StockPriceMovingAverage stockPriceMovingAverage) {
+
+        var ticker = stockPriceMovingAverage.getId();
+        log.info("Processing sell recommendations for ticker: {}", ticker);
+
+        //find exist recommendation
+        var tradeRecommendationOptional = this.tradeRecommendationRepository.findById(ticker);
+
+        if(tradeRecommendationOptional.isEmpty())
+        {
+            log.info("No previous recommendations for ticker: {}", ticker);
+            return;
+        }
+
+        var tradeRecommendation = tradeRecommendationOptional.get();
+
+        log.info("Trade recommendation: {}", tradeRecommendation);
+
+        //Update TradeAction
+        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
+        tradeRecommendation.getTradePrediction().setModelName(movingAverageRuleModelName);
+
+        tradeRecommendationRepository.save(tradeRecommendation);
+        this.tradeRecommendationPublisher.send(tradeRecommendation);
+
     }
 }

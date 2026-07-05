@@ -1,6 +1,6 @@
 package io.cloudNativeData.research.trader.agent.function;
 
-import io.cloudNativeData.research.trader.agent.service.TradeAdviceService;
+import io.cloudNativeData.research.trader.agent.service.ResearchTraderService;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.TradeRecommendation;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
@@ -21,7 +21,7 @@ class SuggestTradeRecommendationProcessorTest {
     private final StockNewsAnalysis news = JavaBeanGeneratorCreator.of(StockNewsAnalysis.class).create();
 
     @Mock
-    private TradeAdviceService service;
+    private ResearchTraderService service;
 
     @BeforeEach
     void setUp() {
