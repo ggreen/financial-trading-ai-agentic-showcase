@@ -207,6 +207,7 @@ class ResearchTraderServiceTest {
         // Stub repository query to simulate returning this entity match
         when(tradeRecommendationRepository.findById(anyString())).thenReturn(Optional.of(this.tradeRecommendation));
         when(tradeRecommendationRepository.save(any(TradeRecommendation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(this.dtoToPriceConverter.convert(any())).thenReturn(this.stockDailyPrice);
 
         // When: The CQ listener triggers the target workflow
         subject.recommendSell(this.stockPriceMovingAverage);
@@ -215,7 +216,7 @@ class ResearchTraderServiceTest {
         verify(tradeRecommendationRepository, times(1)).findById(anyString());
         verify(tradeRecommendationRepository, times(1)).save(any(TradeRecommendation.class));
         verify(tradeRecommendationPublisher).send(any());
-
+        verify(this.stockDailyPriceRepository).save(any(StockDailyPrice.class));
 
     }
 
@@ -231,6 +232,29 @@ class ResearchTraderServiceTest {
         verify(tradeRecommendationRepository, times(1)).findById(anyString());
         verify(tradeRecommendationRepository, never()).save(any(TradeRecommendation.class));
         verify(tradeRecommendationPublisher, never()).send(any());
+        verify(this.stockDailyPriceRepository,never()).save(any(StockDailyPrice.class));
+
     }
 
+
+    @Test
+    void testRecommendBuy_ShouldFindUpdateSaveAndPublish() {
+
+
+
+        // Stub repository query to simulate returning this entity match
+        when(tradeRecommendationRepository.findById(anyString())).thenReturn(Optional.of(this.tradeRecommendation));
+        when(tradeRecommendationRepository.save(any(TradeRecommendation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(this.dtoToPriceConverter.convert(any())).thenReturn(this.stockDailyPrice);
+
+        // When: The CQ listener triggers the target workflow
+        subject.recommendBuy(this.stockPriceMovingAverage);
+
+
+        verify(tradeRecommendationRepository, times(1)).findById(anyString());
+        verify(tradeRecommendationRepository, times(1)).save(any(TradeRecommendation.class));
+        verify(tradeRecommendationPublisher).send(any());
+        verify(this.stockDailyPriceRepository).save(any(StockDailyPrice.class));
+
+    }
 }

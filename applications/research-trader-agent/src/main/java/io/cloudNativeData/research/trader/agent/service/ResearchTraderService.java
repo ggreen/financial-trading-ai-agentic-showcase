@@ -2,8 +2,8 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
-import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
+import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
 import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
@@ -78,6 +78,61 @@ public class ResearchTraderService {
         return tradeRecommendation;
     }
 
+
+    /**
+     * Recommena a sell
+     * @param stockPriceMovingAverage the price and moving average
+     */
+    public void recommendSell(StockPriceMovingAverage stockPriceMovingAverage) {
+        recommendTradeAction(TradeAction.SELL, stockPriceMovingAverage);
+    }
+
+
+    /**
+     * Recommend a buy
+     * @param stockPriceMovingAverage the moving average to recommend
+     */
+    public void recommendBuy(StockPriceMovingAverage stockPriceMovingAverage) {
+
+        recommendTradeAction(TradeAction.BUY, stockPriceMovingAverage);
+    }
+
+
+    /**
+     * Recommendation a trade action BUY or SELL
+     * @param tradeAction the trade action
+     * @param stockPriceMovingAverage the moving average
+     */
+    private void recommendTradeAction(TradeAction tradeAction, StockPriceMovingAverage stockPriceMovingAverage) {
+
+        var ticker = stockPriceMovingAverage.getId();
+        log.info("Processing sell recommendations for ticker: {}", ticker);
+
+        //find exist recommendation
+        var tradeRecommendationOptional = this.tradeRecommendationRepository.findById(ticker);
+
+        if(tradeRecommendationOptional.isEmpty())
+        {
+            log.info("No previous recommendations for ticker: {}", ticker);
+            return;
+        }
+
+        var tradeRecommendation = tradeRecommendationOptional.get();
+
+        log.info("Trade recommendation: {}", tradeRecommendation);
+
+        //Update TradeAction
+        tradeRecommendation.getTradePrediction().setAdviceAction(tradeAction);
+        tradeRecommendation.getTradePrediction().setModelName(movingAverageRuleModelName);
+
+        tradeRecommendationRepository.save(tradeRecommendation);
+
+        this.stockDailyPriceRepository.save(dtoToPriceConverter.convert(stockPriceMovingAverage.getStockPrice()));
+        this.tradeRecommendationPublisher.send(tradeRecommendation);
+
+    }
+
+
     private BigDecimal recommendStockPrice(BigDecimal movingAverage200Day, MarketSentiment marketSentiment, double confidence) {
 
         if (movingAverage200Day == null)
@@ -116,32 +171,5 @@ public class ResearchTraderService {
 
         // Round to 2 decimal places for currency format
         return BigDecimal.valueOf(Math.round(recommendedPrice * 100.0) / 100.0);
-    }
-
-    public void recommendSell(StockPriceMovingAverage stockPriceMovingAverage) {
-
-        var ticker = stockPriceMovingAverage.getId();
-        log.info("Processing sell recommendations for ticker: {}", ticker);
-
-        //find exist recommendation
-        var tradeRecommendationOptional = this.tradeRecommendationRepository.findById(ticker);
-
-        if(tradeRecommendationOptional.isEmpty())
-        {
-            log.info("No previous recommendations for ticker: {}", ticker);
-            return;
-        }
-
-        var tradeRecommendation = tradeRecommendationOptional.get();
-
-        log.info("Trade recommendation: {}", tradeRecommendation);
-
-        //Update TradeAction
-        tradeRecommendation.getTradePrediction().setAdviceAction(TradeAction.SELL);
-        tradeRecommendation.getTradePrediction().setModelName(movingAverageRuleModelName);
-
-        tradeRecommendationRepository.save(tradeRecommendation);
-        this.tradeRecommendationPublisher.send(tradeRecommendation);
-
     }
 }

@@ -13,6 +13,6 @@ import java.math.BigDecimal;
 @Builder
 public class StockPriceMovingAverage {
     private String id; //ticker
-    private double price;
     private double movingAverage200;
+    private StockPriceDto stockPrice;
 }
