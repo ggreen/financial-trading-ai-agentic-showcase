@@ -9,13 +9,14 @@ import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.client.ClientCache;
-import org.apache.geode.cache.query.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.gemfire.client.ClientRegionFactoryBean;
 import org.springframework.data.gemfire.config.annotation.ClientCacheApplication;
 import org.springframework.data.gemfire.function.config.EnableGemfireFunctionExecutions;
+import org.springframework.data.gemfire.listener.ContinuousQueryDefinition;
+import org.springframework.data.gemfire.listener.ContinuousQueryListenerContainer;
 
 @Configuration
 @ClientCacheApplication(subscriptionEnabled = true, readyForEvents = true)
@@ -66,63 +67,55 @@ public class GemFireConfig {
      * Configures the ContinuousQueryListenerContainer to register and manage the CQ.
      */
     @Bean
-    CqQuery sellCqQuery(ClientCache clientCache, StockListenerConfig stockListenerConfig,
-                        SellStockListener sellStockListener) throws CqException, CqExistsException, RegionNotFoundException
-    {
-        var queryService = clientCache.getQueryService();
-        // Create CqAttribute using CqAttributeFactory
-        CqAttributesFactory cqf = new CqAttributesFactory();
+    public ContinuousQueryListenerContainer sellListener(ClientCache clientCache,
+                                                         StockListenerConfig stockListenerConfig,
+                                                         SellStockListener sellStockListener) {
 
-        // Create a listener and add it to the CQ attributes callback defined below
-        cqf.addCqListener(sellStockListener);
-        var cqa = cqf.create();
-        // Name of the CQ and its query
+        log.info("Creating seller listener with conf: {}", stockListenerConfig);
 
-        // Create the CqQuery
-        log.info("Creating seller CQ '{}' with OQL: {}", stockListenerConfig.getSellerName(),
-                stockListenerConfig.getSellerQuery());
+        ContinuousQueryListenerContainer container = new ContinuousQueryListenerContainer();
+        container.setCache(clientCache);
 
-        var cqQuery = queryService.newCq(stockListenerConfig.getSellerName(),
-                stockListenerConfig.getSellerQuery(), cqa,false);
+        // Define the CQ definition (Name, Query String, and the Listener)
+        var cqDefinition = new ContinuousQueryDefinition(
+                stockListenerConfig.getSellerName(),
+                stockListenerConfig.getSellerQuery(),
+                sellStockListener,
+                false // durable flag
+        );
 
-        // Execute CQ, getting the optional initial result set
-        // Without the initial result set, the call is priceTracker.execute();
-        cqQuery.execute();
+        // Register the definition to the container
+        container.addContinuousQueryDefinition(cqDefinition);
 
-        return cqQuery;
-
+        return container;
     }
 
     /**
      * Configures the ContinuousQueryListenerContainer to register and manage the CQ.
      */
     @Bean
-    CqQuery buyCqQuery(ClientCache clientCache, StockListenerConfig stockListenerConfig,
-                        BuyStockListener buyStockListener) throws CqException, CqExistsException, RegionNotFoundException
-    {
-        var queryService = clientCache.getQueryService();
-        // Create CqAttribute using CqAttributeFactory
-        CqAttributesFactory cqf = new CqAttributesFactory();
+    public ContinuousQueryListenerContainer buyListener(StockListenerConfig stockListenerConfig,
+                                                        ClientCache clientCache,
+                                                        BuyStockListener buyStockListener) {
 
-        // Create a listener and add it to the CQ attributes callback defined below
-        cqf.addCqListener(buyStockListener);
-        var cqa = cqf.create();
-        // Name of the CQ and its query
+        log.info("Creating buyer listener with conf: {}", stockListenerConfig);
 
-        // Create the CqQuery
-        log.info("Creating buyer CQ '{}' with OQL: {}", stockListenerConfig.getBuyerName(),
-                stockListenerConfig.getBuyerQuery());
+        ContinuousQueryListenerContainer container = new ContinuousQueryListenerContainer();
+        container.setCache(clientCache);
 
-        var cqQuery = queryService.newCq(stockListenerConfig.getBuyerName(),
-                stockListenerConfig.getBuyerQuery(), cqa,false);
 
-        // Execute CQ, getting the optional initial result set
-        // Without the initial result set, the call is priceTracker.execute();
-        cqQuery.execute();
+        // Define the CQ definition (Name, Query String, and the Listener)
+        var cqDefinition = new ContinuousQueryDefinition(
+                stockListenerConfig.getBuyerName(),
+                stockListenerConfig.getBuyerQuery(),
+                buyStockListener,
+                false // durable flag
+        );
 
-        return cqQuery;
+        // Register the definition to the container
+        container.addContinuousQueryDefinition(cqDefinition);
 
+        return container;
     }
-
 }
 

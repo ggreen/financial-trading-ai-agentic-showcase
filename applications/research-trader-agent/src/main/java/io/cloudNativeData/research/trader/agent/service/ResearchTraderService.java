@@ -2,6 +2,7 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
+import io.cloudNativeData.research.trader.agent.repository.StockPriceMovingAverageRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
@@ -29,6 +30,7 @@ public class ResearchTraderService {
     private final StockDailyPriceRepository stockDailyPriceRepository;
     private final Converter<StockPriceDto, StockDailyPrice> dtoToPriceConverter;
     private final Publisher<TradeRecommendation> tradeRecommendationPublisher;
+    private final StockPriceMovingAverageRepository stockPriceMovingAverageRepository;
     private final static String movingAverageRuleModelName = "rule-movingAverage";
 
 
@@ -71,7 +73,19 @@ public class ResearchTraderService {
         tradeRecommendationRepository.save(tradeRecommendation);
 
         if (tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction())) {
-            log.info("NA action for {}, so return null", tradePrediction);
+            log.info("No trade prediction so adding to stock price moving average to watch for price changes for {}", tradePrediction);
+
+            var stockPriceMovingAverage = StockPriceMovingAverage.builder()
+                    .id(stockNewsAnalysis.getTicker())
+                    .movingAverage200(movingAverage200.doubleValue())
+                    .stockPrice(stockPrice)
+                    .build();
+
+            log.info("Watching stock by Saving stockPriceMovingAverage: {}", stockPriceMovingAverage);
+
+            this.stockPriceMovingAverageRepository.save(stockPriceMovingAverage);
+
+            log.info("Return null since cannot recommend stock news analysis id: {} at this time.",stockNewsAnalysis.getId());
             return null;
         }
 

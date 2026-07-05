@@ -2,6 +2,7 @@ package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
+import io.cloudNativeData.research.trader.agent.repository.StockPriceMovingAverageRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.research.trader.agent.service.stocks.StockPriceService;
@@ -13,6 +14,7 @@ import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreato
 import nyla.solutions.core.patterns.integration.Publisher;
 import org.apache.catalina.Session;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -34,6 +37,9 @@ class ResearchTraderServiceTest {
 
     @Mock
     private StockPriceService stockPriceService;
+
+    @Mock
+    private StockPriceMovingAverageRepository stockPriceMovingAverageRepository;
 
     @Mock
     private StockPricingExecution stockPricingExecution;
@@ -66,7 +72,8 @@ class ResearchTraderServiceTest {
         subject = new ResearchTraderService(inference, stockPricingExecution,
                 tradeRecommendationRepository,stockPriceService,stockDailyPriceRepository,
                 dtoToPriceConverter,
-                tradeRecommendationPublisher);
+                tradeRecommendationPublisher,
+                stockPriceMovingAverageRepository);
     }
 
     @Test
@@ -256,5 +263,38 @@ class ResearchTraderServiceTest {
         verify(tradeRecommendationPublisher).send(any());
         verify(this.stockDailyPriceRepository).save(any(StockDailyPrice.class));
 
+    }
+
+    @Test
+    @DisplayName("Should add to stock price moving average when no TradeAction")
+    void recommend_WhenTradeActionIsNull_ShouldReturnNull() {
+        // Arrange
+        String id = "analysis-123";
+        String ticker = "AAPL";
+
+        StockNewsAnalysis mockNewsAnalysis = mock(StockNewsAnalysis.class);
+        StockPrediction mockPrediction = mock(StockPrediction.class);
+
+        when(mockNewsAnalysis.getId()).thenReturn(id);
+        when(mockNewsAnalysis.getTicker()).thenReturn(ticker);
+        when(mockNewsAnalysis.getStockPrediction()).thenReturn(mockPrediction);
+        when(mockPrediction.getMarketSentiment()).thenReturn(MarketSentiment.NEUTRAL);
+        when(mockPrediction.getSentimentConfidence()).thenReturn(BigDecimal.valueOf(0.5));
+
+        // Mocking stock price steps
+        when(stockPriceService.getCurrentStockPrice(ticker)).thenReturn(new StockPriceDto());
+        when(dtoToPriceConverter.convert(any(StockPriceDto.class))).thenReturn(new StockDailyPrice());
+        when(this.stockPricingExecution.calculateMovingAverage200(id)).thenReturn(BigDecimal.valueOf(150.00));
+
+        // Forcing TradeAction to be NA or TradePrediction to return an empty/null action
+        TradePrediction mockTradePrediction = mock(TradePrediction.class);
+        when(mockTradePrediction.getAdviceAction()).thenReturn(TradeAction.NA);
+        when(inference.recommend(any(TradeParameters.class))).thenReturn(mockTradePrediction);
+
+        // Act
+        TradeRecommendation result = subject.recommend(mockNewsAnalysis);
+
+        // Assert
+        verify(stockPriceMovingAverageRepository).save(any(StockPriceMovingAverage.class));
     }
 }

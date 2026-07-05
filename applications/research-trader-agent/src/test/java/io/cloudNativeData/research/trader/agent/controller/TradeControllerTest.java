@@ -1,5 +1,6 @@
 package io.cloudNativeData.research.trader.agent.controller;
 
+import io.cloudNativeData.research.trader.agent.properties.StockListenerConfig;
 import io.cloudNativeData.research.trader.agent.repository.TradeRecommendationRepository;
 import io.cloudNativeData.trading.TradeRecommendation;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
@@ -22,12 +23,15 @@ class TradeControllerTest {
     private TradeRecommendationRepository repository;
     private final TradeRecommendation tradeRecommendation = JavaBeanGeneratorCreator.of(TradeRecommendation.class).create();
 
+    @Mock
+    private StockListenerConfig stockListenerConfig;
+
     private TradeController subject;
 
 
     @BeforeEach
     void setUp() {
-        subject = new TradeController(repository);
+        subject = new TradeController(repository,stockListenerConfig);
     }
 
     @Test
@@ -38,5 +42,15 @@ class TradeControllerTest {
         var actual = subject.findAllTradeRecommendations();
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void getStockListenerConfig() {
+        // Act
+        var actual = subject.getStockListenerConfig();
+
+        // Assert
+        assertThat(actual).isNotNull();
+        assertThat(actual).isEqualTo(stockListenerConfig);
     }
 }
