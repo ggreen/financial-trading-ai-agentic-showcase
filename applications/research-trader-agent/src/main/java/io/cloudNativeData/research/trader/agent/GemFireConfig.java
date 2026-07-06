@@ -9,6 +9,7 @@ import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.geode.cache.DataPolicy;
 import org.apache.geode.cache.client.ClientCache;
+import org.apache.geode.cache.execute.ResultCollector;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
