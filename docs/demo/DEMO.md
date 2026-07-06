@@ -1,5 +1,12 @@
 
 
+Task
+
+```properties
+stock-daily-price-batch --input.file.path="file:///Users/Projects/solutions/AI-ML/dev/financial-trading-ai-agentic-showcase/applications/batch/stock-daily-price-batch/src/main/resources/csv/acme_stock_prices.csv"
+```
+
+
 ```text
 agent-flow=sentiment-news-agent  --server.port=9001 | research-trader-agent --server.port=9002 | portfolio-agent --server.port=9003
 ai-sql=portfolio-sql-analytics-mcp-server --server.port=9077 || stock-price --server.port=9999

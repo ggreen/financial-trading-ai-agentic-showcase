@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 class NewsContextToDocumentsConverterTest {
 
     // Assuming your class is named NewsContextConverter
-    private NewsContextToDocumentsConverter converter;
+    private NewsContextToDocumentsConverter subject;
 
     private final String configuredModelName = "semantic";
 
@@ -37,7 +37,7 @@ class NewsContextToDocumentsConverterTest {
     @BeforeEach
     void setUp() {
         // Injecting the modelName into the converter instance
-        converter = new NewsContextToDocumentsConverter(configuredModelName);
+        subject = new NewsContextToDocumentsConverter(configuredModelName);
     }
 
     @Test
@@ -51,7 +51,7 @@ class NewsContextToDocumentsConverterTest {
         when(newsContext.getId()).thenReturn(rawNewsText);
 
         // When
-        List<Document> result = converter.convert(newsContext);
+        List<Document> result = subject.convert(newsContext);
 
         // Then
         assertNotNull(result, "The resulting list should not be null");

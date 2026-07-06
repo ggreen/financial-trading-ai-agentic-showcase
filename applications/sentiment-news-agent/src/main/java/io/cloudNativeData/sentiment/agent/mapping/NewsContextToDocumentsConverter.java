@@ -24,6 +24,7 @@ public class NewsContextToDocumentsConverter implements Converter<NewsContext, L
     public List<Document> convert(@NonNull NewsContext newsContent) {
 
         return List.of(
+                Document.builder().text(newsContent.getId()).build()
                 );
     }
 }
