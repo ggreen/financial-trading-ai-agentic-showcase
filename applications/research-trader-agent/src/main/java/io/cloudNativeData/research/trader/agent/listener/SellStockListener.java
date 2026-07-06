@@ -19,7 +19,22 @@ public class SellStockListener extends CqListenerAdapter implements ContinuousQu
     public void onEvent(CqEvent cqEvent) {
         // The Region Key represents the stock ticker (e.g., "AAPL", "TSLA")
 
-        if (cqEvent != null && cqEvent.getKey() != null) {
+        if(cqEvent == null)
+        {
+            log.info("cqEvent is null");
+            return;
+        }
+        var op = cqEvent.getBaseOperation();
+
+        // The Region Key represents the stock ticker (e.g., "AAPL", "TSLA")
+        if(op ==null || op.isDestroy() || op.isClear() || op.isInvalidate() ||
+                op.isRemoveAll())
+        {
+            log.info("Ignoring event: {}",cqEvent);
+            return;
+        }
+
+        if (cqEvent.getKey() != null) {
             var ticker = cqEvent.getKey().toString();
 
             log.info("SELL STOCK listener invoked. Sell stock event received: {}", ticker);

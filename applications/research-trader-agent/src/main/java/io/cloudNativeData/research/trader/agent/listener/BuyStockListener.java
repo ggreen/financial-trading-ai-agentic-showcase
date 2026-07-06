@@ -4,6 +4,7 @@ import io.cloudNativeData.research.trader.agent.service.ResearchTraderService;
 import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.geode.cache.Operation;
 import org.apache.geode.cache.query.CqEvent;
 import org.apache.geode.cache.util.CqListenerAdapter;
 import org.springframework.data.gemfire.listener.ContinuousQueryListener;
@@ -19,7 +20,20 @@ public class BuyStockListener extends CqListenerAdapter implements ContinuousQue
     public void onEvent(CqEvent cqEvent) {
 
 
+        if(cqEvent == null)
+        {
+            log.info("cqEvent is null");
+            return;
+        }
+        var op = cqEvent.getBaseOperation();
+
         // The Region Key represents the stock ticker (e.g., "AAPL", "TSLA")
+        if(op ==null || op.isDestroy() || op.isClear() || op.isInvalidate() ||
+                op.isRemoveAll())
+        {
+            log.info("Ignoring event: {}",cqEvent);
+            return;
+        }
 
         if (cqEvent != null && cqEvent.getKey() != null) {
             var ticker = cqEvent.getKey().toString();

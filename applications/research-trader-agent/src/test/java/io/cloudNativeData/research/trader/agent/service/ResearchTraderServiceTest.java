@@ -268,6 +268,7 @@ class ResearchTraderServiceTest {
         verify(tradeRecommendationRepository, times(1)).save(any(TradeRecommendation.class));
         verify(tradeRecommendationPublisher).send(any());
         verify(this.stockDailyPriceRepository).save(any(StockDailyPrice.class));
+        verify(this.stockPriceMovingAverageRepository).deleteById(anyString());
 
     }
 

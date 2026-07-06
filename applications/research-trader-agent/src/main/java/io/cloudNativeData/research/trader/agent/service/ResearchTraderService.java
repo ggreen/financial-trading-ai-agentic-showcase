@@ -150,6 +150,7 @@ public class ResearchTraderService {
         tradeRecommendationRepository.save(tradeRecommendation);
 
         this.stockDailyPriceRepository.save(dtoToPriceConverter.convert(stockPriceMovingAverage.getStockPrice()));
+        this.stockPriceMovingAverageRepository.deleteById(ticker);
         this.tradeRecommendationPublisher.send(tradeRecommendation);
 
     }

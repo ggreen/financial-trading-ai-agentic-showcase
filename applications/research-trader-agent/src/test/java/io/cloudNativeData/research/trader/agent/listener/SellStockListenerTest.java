@@ -3,6 +3,7 @@ package io.cloudNativeData.research.trader.agent.listener;
 import io.cloudNativeData.research.trader.agent.service.ResearchTraderService;
 import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
+import org.apache.geode.cache.Operation;
 import org.apache.geode.cache.query.CqEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ class SellStockListenerTest {
     @Mock
     private  StockPriceMovingAverage mockStockPriceMovingAverage ;
 
+    @Mock
+    private Operation operation;
+
     private SellStockListener sellStockListener;
 
     @BeforeEach
@@ -38,7 +42,9 @@ class SellStockListenerTest {
     void testOnEvent_ShouldCallRecommendSellWithCorrectTicker() {
         // Given: A Geode event containing the stock ticker "NVDA" as the key
         String expectedTicker = "NVDA";
+        when(cqEvent.getBaseOperation()).thenReturn(operation);
         when(cqEvent.getKey()).thenReturn(expectedTicker);
+
         when(cqEvent.getNewValue()).thenReturn(mockStockPriceMovingAverage);
 
         // When: The event fires
@@ -50,6 +56,7 @@ class SellStockListenerTest {
 
     @Test
     void testOnEvent_WithNullKey_ShouldNotCallService() {
+        when(cqEvent.getBaseOperation()).thenReturn(operation);
         // Given: An edge-case event where the key is missing or null
         when(cqEvent.getKey()).thenReturn(null);
 
