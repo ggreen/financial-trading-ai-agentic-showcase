@@ -427,7 +427,7 @@
                                         <div>
                                             <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Moving Average 200</label>
                                             <div class="relative">
-                                                <input type="number" step="0.01" v-model="maNode.movingAverage200" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <input type="number" step="0.01" v-model.number="maNode.movingAverage200" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
                                                 <i class="fa-solid fa-wave-square absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
                                             </div>
                                         </div>
@@ -435,7 +435,7 @@
                                         <div>
                                             <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Stock Price (stockPrice.price)</label>
                                             <div class="relative">
-                                                <input type="number" step="0.01" v-model="maNode.stockPrice.price" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <input type="number" step="0.01" v-model.number="maNode.stockPrice.price" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
                                                 <i class="fa-solid fa-dollar-sign absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
                                             </div>
                                         </div>
@@ -451,7 +451,7 @@
                                         <div>
                                             <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Trading Volume (stockPrice.volume)</label>
                                             <div class="relative">
-                                                <input type="number" v-model="maNode.stockPrice.volume" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <input type="number" v-model.number="maNode.stockPrice.volume" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
                                                 <i class="fa-solid fa-database absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
                                             </div>
                                         </div>
@@ -464,6 +464,13 @@
                                             </div>
                                         </div>
 
+                                    </div>
+
+                                    <div class="flex justify-end pt-2 border-t border-tanzu-border/40">
+                                        <button @click="saveMovingAverage(maNode)" class="bg-tanzu-green hover:bg-opacity-90 text-slate-950 font-bold text-xs px-4 py-2 rounded-md transition flex items-center space-x-1.5 shadow-sm">
+                                            <i class="fa-solid fa-floppy-disk"></i>
+                                            <span>Save Node Configuration</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -519,7 +526,7 @@
             const selectedItem = ref(null);
             let timer = null;
 
-            // NEW Watch List Reactive Control Properties
+            // Watch List Reactive Control Properties
             const showWatchList = ref(false);
             const watchListLoading = ref(false);
             const watchListData = ref({
@@ -606,12 +613,11 @@
                 }
             };
 
-            // NEW Watch List Parsing Routines
+            // Watch List Parsing Routines
             const fetchWatchList = async () => {
                 watchListLoading.value = true;
                 if (usingMock.value) {
                     setTimeout(() => {
-                        // Spread clone configuration data properties to decouple runtime layout arrays mutations from base payload arrays
                         watchListData.value = JSON.parse(JSON.stringify(watchListMockData));
                         watchListLoading.value = false;
                     }, 300);
@@ -629,6 +635,52 @@
                     console.error("Watch list connection error context logging:", err.message);
                 } finally {
                     watchListLoading.value = false;
+                }
+            };
+
+            // Added POST Request Method Routine for Stock Price Moving Averages Form Actions
+            const saveMovingAverage = async (maNode) => {
+                // Construct structure payload according to required JSON contract configuration mapping context parameters
+                const payload = {
+                    id: maNode.id,
+                    movingAverage200: Number(maNode.movingAverage200),
+                    stockPrice: {
+                        ticker: maNode.stockPrice?.ticker || maNode.id,
+                        name: maNode.stockPrice?.name || maNode.id,
+                        price: Number(maNode.stockPrice?.price || 0),
+                        exchange: maNode.stockPrice?.exchange || "string",
+                        updated: Number(maNode.stockPrice?.updated || Date.now()),
+                        currency: maNode.stockPrice?.currency || "USD",
+                        volume: Number(maNode.stockPrice?.volume || 0)
+                    }
+                };
+
+                console.log("Submitting context tracking sync payload data vector structure: ", payload);
+
+                if (usingMock.value) {
+                    alert(`DEMO MODE SUCCESS: POST Request sent to /functions/saveStockPriceMovingAverageSink successfully!\n\nPayload:\n${JSON.stringify(payload, null, 2)}`);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/functions/saveStockPriceMovingAverageSink', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'accept': '*/*'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP System Error Status: ${response.status}`);
+                    }
+
+                    alert("System telemetry entry synchronized successfully inside data pipelines.");
+                    fetchWatchList(); // Refresh watch layout stack
+                } catch (err) {
+                    console.error("Data pipeline sink process submission failed: ", err.message);
+                    alert(`Submission Interrupted: ${err.message}`);
                 }
             };
 
@@ -692,6 +744,7 @@
                 watchListData,
                 fetchData,
                 fetchWatchList,
+                saveMovingAverage,
                 openWatchList,
                 closeWatchList,
                 toggleMock,
