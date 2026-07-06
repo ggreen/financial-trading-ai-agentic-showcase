@@ -41,12 +41,11 @@ import java.util.stream.Collectors;
 @EnableAutoConfiguration
 public class BatchAppConf {
 
-    @Value("classpath:csv/stock-demo-csv.csv")
+//    @Value("classpath:csv/stock-demo-csv.csv")
+    @Value("${input.file.path}")
     private Resource sourceStockDailyPrice;
 
-
-
-    @Value("${batch.read.chunk.size:100}")
+    @Value("${batch.read.chunk.size:10000}")
     private int chunkSize;
 
 
