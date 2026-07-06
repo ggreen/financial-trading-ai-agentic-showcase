@@ -78,7 +78,9 @@ public class ResearchTraderService {
 
         tradeRecommendationRepository.save(tradeRecommendation);
 
-        if (tradePrediction != null && TradeAction.NA.equals(tradePrediction.getAdviceAction())) {
+        if (tradePrediction == null ||
+                tradePrediction.getAdviceAction() == null ||
+                (TradeAction.NA.equals(tradePrediction.getAdviceAction()))) {
             log.info("No trade prediction so adding to stock price moving average to watch for price changes for {}", tradePrediction);
 
             var stockPriceMovingAverage = StockPriceMovingAverage.builder()

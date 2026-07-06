@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -338,5 +337,50 @@ class ResearchTraderServiceTest {
 
         // Assert: Verify that the repository's save method was called exactly once with the correct object
         verify(stockPriceMovingAverageRepository, times(1)).save(any(StockPriceMovingAverage.class));
+    }
+
+    @Test
+    void recommend_WhenTradeActionIsNA_ShouldSaveStockPriceMovingAverageAndReturnNull() {
+        // 1. Arrange (Setup Mock Data)
+        String ticker = "AAPL";
+        String analysisId = "1L";
+
+        StockNewsAnalysis stockNewsAnalysis = mock(StockNewsAnalysis.class);
+        StockPrediction stockPrediction = mock(StockPrediction.class);
+//        s stockPrice = mock(StockPrice.class);
+        StockPriceDto stockPrice = mock(StockPriceDto.class);
+        TradePrediction tradePrediction = mock(TradePrediction.class);
+
+        BigDecimal movingAverage200 = new BigDecimal("150.00");
+
+        when(stockNewsAnalysis.getTicker()).thenReturn(ticker);
+        when(this.dtoToPriceConverter.convert(any())).thenReturn(this.stockDailyPrice);
+        when(this.stockPriceService.getCurrentStockPrice(anyString())).thenReturn(stockPrice);
+        when(stockNewsAnalysis.getId()).thenReturn(analysisId);
+        when(stockNewsAnalysis.getStockPrediction()).thenReturn(stockPrediction);
+
+        // Setup prediction details for the calculation
+        when(stockPrediction.getMarketSentiment()).thenReturn(MarketSentiment.BULLISH); // Adjust as needed
+        when(stockPrediction.getSentimentConfidence()).thenReturn(new BigDecimal("0.85"));
+
+        when(stockPriceService.getCurrentStockPrice(ticker)).thenReturn(stockPrice);
+        when(this.stockPricingExecution.calculateMovingAverage200(analysisId)).thenReturn(movingAverage200);
+
+        // Crucial Part: Force the inference to return NA action to enter the target IF block
+        when(inference.recommend(any(TradeParameters.class))).thenReturn(tradePrediction);
+        when(tradePrediction.getAdviceAction()).thenReturn(TradeAction.NA);
+
+        // 2. Act
+        TradeRecommendation result = subject.recommend(stockNewsAnalysis);
+
+        // 3. Assert
+        assertNull(result, "Should return null when trade action is NA");
+
+        // Verify that the moving average repository saved the entity
+        verify(stockPriceMovingAverageRepository, times(1)).save(any(StockPriceMovingAverage.class));
+
+        // Verify standard flows still happened
+        verify(stockDailyPriceRepository, times(1)).save(any(StockDailyPrice.class));
+        verify(tradeRecommendationRepository, times(1)).save(any(TradeRecommendation.class));
     }
 }

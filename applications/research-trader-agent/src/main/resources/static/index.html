@@ -89,6 +89,10 @@
                             <i class="fa-solid fa-table-list w-5"></i>
                             <span>Recommendations Grid</span>
                         </a>
+                        <button @click="openWatchList" class="w-full flex items-center space-x-3 text-tanzu-gray hover:bg-tanzu-border/40 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition text-left">
+                            <i class="fa-solid fa-eye w-5 text-tanzu-blue"></i>
+                            <span>Watch List</span>
+                        </button>
                         <a href="#" class="flex items-center space-x-3 text-tanzu-gray hover:bg-tanzu-border/40 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition">
                             <i class="fa-solid fa-tower-broadcast w-5"></i>
                             <span>Sentiment Pipelines</span>
@@ -126,11 +130,17 @@
                     <h1 class="text-2xl font-bold tracking-tight text-white">Automated Trade Recommendations Matrix</h1>
                 </div>
 
-                <div class="flex items-center space-x-2 bg-tanzu-sidebar border border-tanzu-border p-1.5 rounded-lg">
-                    <span class="text-xs font-medium px-2 text-tanzu-gray">Simulate Live API Engine:</span>
-                    <button @click="toggleMock" :class="usingMock ? 'bg-tanzu-blue text-white' : 'bg-tanzu-bg text-tanzu-gray'" class="text-xs font-semibold px-3 py-1 rounded transition shadow-sm">
-                        {{ usingMock ? 'ACTIVE (Demo Data)' : 'OFFLINE' }}
+                <div class="flex items-center gap-2">
+                    <button @click="openWatchList" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 border border-tanzu-border rounded-lg text-white transition flex items-center space-x-2 md:hidden shadow-sm">
+                        <i class="fa-solid fa-eye text-tanzu-blue"></i>
+                        <span>Watch List</span>
                     </button>
+                    <div class="flex items-center space-x-2 bg-tanzu-sidebar border border-tanzu-border p-1.5 rounded-lg">
+                        <span class="text-xs font-medium px-2 text-tanzu-gray">Simulate Live API Engine:</span>
+                        <button @click="toggleMock" :class="usingMock ? 'bg-tanzu-blue text-white' : 'bg-tanzu-bg text-tanzu-gray'" class="text-xs font-semibold px-3 py-1 rounded transition shadow-sm">
+                            {{ usingMock ? 'ACTIVE (Demo Data)' : 'OFFLINE' }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -276,7 +286,6 @@
                                         </div>
                                     </div>
 
-
                                     <div>
                                         <label class="block text-[11px] text-tanzu-gray font-medium mb-1">Model</label>
                                         <div class="font-mono font-bold text-white text-sm bg-tanzu-bg px-2.5 py-1 rounded border border-tanzu-border text-center">
@@ -359,6 +368,127 @@
                 </div>
             </div>
 
+            <div v-if="showWatchList" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="closeWatchList">
+                <div class="bg-slate-900 border border-tanzu-border rounded-xl shadow-2xl max-w-5xl w-full flex flex-col max-h-[85vh]">
+
+                    <div class="p-4 border-b border-tanzu-border flex items-center justify-between bg-slate-900/50">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="bg-tanzu-blue text-slate-950 p-1.5 rounded text-xs flex items-center justify-center">
+                                <i class="fa-solid fa-eye text-white"></i>
+                            </span>
+                            <div>
+                                <h3 class="text-sm font-bold text-white tracking-tight">Active Watch List Engine Matrix</h3>
+                                <p class="text-[10px] text-tanzu-gray font-mono mt-0.5">Endpoint: GET http://localhost:8066/trades/stock/trader/watch</p>
+                            </div>
+                        </div>
+                        <button @click="closeWatchList" class="text-tanzu-gray hover:text-white transition p-1 text-sm">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 overflow-y-auto custom-popup-scroll space-y-6 bg-tanzu-bg/30">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-950/40 border border-tanzu-border p-3 rounded-lg">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-tanzu-green mb-1.5 font-mono">Ingested Buy Query String</label>
+                                <div class="bg-slate-900 border border-tanzu-border/60 rounded px-3 py-2 text-xs font-mono text-slate-300 break-all select-all">
+                                    {{ watchListData.buyQuery || 'SELECT * FROM /StockPriceMovingAverage WHERE stockPrice.price > movingAverage200' }}
+                                </div>
+                            </div>
+                            <div class="bg-slate-950/40 border border-tanzu-border p-3 rounded-lg">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-rose-400 mb-1.5 font-mono">Ingested Sell Query String</label>
+                                <div class="bg-slate-900 border border-tanzu-border/60 rounded px-3 py-2 text-xs font-mono text-slate-300 break-all select-all">
+                                    {{ watchListData.sellQuery || 'SELECT * FROM /StockPriceMovingAverage WHERE stockPrice.price < movingAverage200' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-bold uppercase tracking-widest text-tanzu-gray mb-3 flex items-center">
+                                <i class="fa-solid fa-chart-line text-tanzu-blue mr-2"></i> Stock Price Moving Averages ({{ watchListData.stockPriceMovingAverages?.length || 0 }} Items)
+                            </div>
+
+                            <div class="space-y-4">
+                                <div v-for="(maNode, index) in watchListData.stockPriceMovingAverages" :key="index" class="bg-slate-900 border border-tanzu-border rounded-lg p-5 space-y-4 relative group">
+                                    <div class="absolute top-3 right-4 font-mono text-[10px] text-tanzu-border group-hover:text-tanzu-blue transition-colors">
+                                        NODE_VECTOR_#[{{ index + 1 }}]
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Identifier (Id)</label>
+                                            <div class="relative">
+                                                <input type="text" v-model="maNode.id" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-fingerprint absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Moving Average 200</label>
+                                            <div class="relative">
+                                                <input type="number" step="0.01" v-model="maNode.movingAverage200" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-wave-square absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Stock Price (stockPrice.price)</label>
+                                            <div class="relative">
+                                                <input type="number" step="0.01" v-model="maNode.stockPrice.price" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-dollar-sign absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Currency Symbol (stockPrice.currency)</label>
+                                            <div class="relative">
+                                                <input type="text" v-model="maNode.stockPrice.currency" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-money-bill-1 absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Trading Volume (stockPrice.volume)</label>
+                                            <div class="relative">
+                                                <input type="number" v-model="maNode.stockPrice.volume" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-database absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Market Exchange (stockPrice.exchange)</label>
+                                            <div class="relative">
+                                                <input type="text" v-model="maNode.stockPrice.exchange" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono">
+                                                <i class="fa-solid fa-building-columns absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div v-if="!watchListData.stockPriceMovingAverages || watchListData.stockPriceMovingAverages.length === 0" class="text-center py-8 text-tanzu-gray bg-slate-950/20 border border-dashed border-tanzu-border rounded-lg">
+                                    <i class="fa-solid fa-eye-slash text-xl mb-2 block text-tanzu-gray/60"></i>
+                                    <span class="text-xs font-mono">No watch records parsed successfully.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="p-3 bg-slate-950/40 border-t border-tanzu-border flex justify-between items-center px-4">
+                        <button @click="fetchWatchList" class="border border-tanzu-blue/30 bg-tanzu-blue/10 hover:bg-tanzu-blue text-tanzu-blue hover:text-slate-950 text-xs font-semibold px-3 py-1.5 rounded transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-arrows-rotate" :class="{'animate-spin': watchListLoading}"></i>
+                            <span>Sync Registry</span>
+                        </button>
+                        <button @click="closeWatchList" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-1.5 rounded text-white transition">
+                            Close Matrix Watcher
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -385,9 +515,38 @@
             const usingMock = ref(true);
             const lastUpdated = ref('');
 
-            // New active modal selection node tracking reference
+            // Reference trackers for standard details modal popup window node references
             const selectedItem = ref(null);
             let timer = null;
+
+            // NEW Watch List Reactive Control Properties
+            const showWatchList = ref(false);
+            const watchListLoading = ref(false);
+            const watchListData = ref({
+                stockPriceMovingAverages: [],
+                buyQuery: '',
+                sellQuery: ''
+            });
+
+            const watchListMockData = {
+                "stockPriceMovingAverages": [
+                    {
+                        "id": "ACME_INS",
+                        "movingAverage200": 128.25,
+                        "stockPrice": {
+                            "currency": "USD",
+                            "exchange": "NASDAQ",
+                            "name": "ACME_INS",
+                            "price": 128.25,
+                            "ticker": "ACME_INS",
+                            "updated": 1783296642168,
+                            "volume": 117939
+                        }
+                    }
+                ],
+                "buyQuery": "SELECT * FROM /StockPriceMovingAverage WHERE stockPrice.price > movingAverage200",
+                "sellQuery": "SELECT * FROM /StockPriceMovingAverage WHERE stockPrice.price < movingAverage200"
+            };
 
             const payloadMockData = [
                 {
@@ -447,9 +606,47 @@
                 }
             };
 
+            // NEW Watch List Parsing Routines
+            const fetchWatchList = async () => {
+                watchListLoading.value = true;
+                if (usingMock.value) {
+                    setTimeout(() => {
+                        // Spread clone configuration data properties to decouple runtime layout arrays mutations from base payload arrays
+                        watchListData.value = JSON.parse(JSON.stringify(watchListMockData));
+                        watchListLoading.value = false;
+                    }, 300);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/trades/stock/trader/watch', {
+                        method: 'GET',
+                        headers: { 'accept': '*/*' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP Matrix Error: ${response.status}`);
+                    watchListData.value = await response.json();
+                } catch (err) {
+                    console.error("Watch list connection error context logging:", err.message);
+                } finally {
+                    watchListLoading.value = false;
+                }
+            };
+
+            const openWatchList = () => {
+                showWatchList.value = true;
+                fetchWatchList();
+            };
+
+            const closeWatchList = () => {
+                showWatchList.value = false;
+            };
+
             const toggleMock = () => {
                 usingMock.value = !usingMock.value;
                 fetchData();
+                if (showWatchList.value) {
+                    fetchWatchList();
+                }
             };
 
             const resetPolling = () => {
@@ -459,7 +656,6 @@
                 }
             };
 
-            // Modal Trigger Actions
             const selectItem = (item) => {
                 selectedItem.value = item;
             };
@@ -491,7 +687,13 @@
                 lastUpdated,
                 selectedItem,
                 nullActionCount,
+                showWatchList,
+                watchListLoading,
+                watchListData,
                 fetchData,
+                fetchWatchList,
+                openWatchList,
+                closeWatchList,
                 toggleMock,
                 resetPolling,
                 selectItem,
