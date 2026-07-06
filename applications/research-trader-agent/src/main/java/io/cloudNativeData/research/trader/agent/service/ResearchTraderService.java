@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
+import io.cloudNativeData.research.trader.agent.properties.StockListenerConfig;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPriceMovingAverageRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
@@ -10,6 +11,7 @@ import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
+import io.cloudNativeData.trading.watch.StockPriceMovingAverageWatchList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.patterns.integration.Publisher;
@@ -31,6 +33,7 @@ public class ResearchTraderService {
     private final Converter<StockPriceDto, StockDailyPrice> dtoToPriceConverter;
     private final Publisher<TradeRecommendation> tradeRecommendationPublisher;
     private final StockPriceMovingAverageRepository stockPriceMovingAverageRepository;
+    private final StockListenerConfig stockListenerConfig;
     private final static String movingAverageRuleModelName = "rule-movingAverage";
 
 
@@ -52,6 +55,9 @@ public class ResearchTraderService {
                 .prediction(stockNewsAnalysis.getStockPrediction())
                 .movingAverage200(movingAverage200)
                 .build();
+
+        log.info("Performing inference to determine trade recommendation, for stockNewsAnalysis Id: {}",
+                stockNewsAnalysis.getId());
 
         var tradePrediction = inference.recommend(summary200);
         log.info("predication: {}", tradePrediction);
@@ -185,5 +191,26 @@ public class ResearchTraderService {
 
         // Round to 2 decimal places for currency format
         return BigDecimal.valueOf(Math.round(recommendedPrice * 100.0) / 100.0);
+    }
+
+
+    public StockPriceMovingAverageWatchList getStockPriceMovingAverageWatchList() {
+
+        var ids = this.stockPriceMovingAverageRepository.findAllIds();
+
+        return StockPriceMovingAverageWatchList.builder()
+                .stockPriceMovingAverages(stockPriceMovingAverageRepository.findAll())
+                .buyQuery(stockListenerConfig.getBuyerQuery())
+                .sellQuery(stockListenerConfig.getSellerQuery())
+                .build();
+    }
+
+
+    /**
+     *
+     * @param stockPriceMovingAverage the stock price moving average
+     */
+    public void saveStockMovingAverage(StockPriceMovingAverage stockPriceMovingAverage) {
+        this.stockPriceMovingAverageRepository.save(stockPriceMovingAverage);
     }
 }

@@ -1,6 +1,7 @@
 package io.cloudNativeData.research.trader.agent.service;
 
 import io.cloudNativeData.research.trader.agent.ai.TradePredictionInference;
+import io.cloudNativeData.research.trader.agent.properties.StockListenerConfig;
 import io.cloudNativeData.research.trader.agent.repository.StockDailyPriceRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPriceMovingAverageRepository;
 import io.cloudNativeData.research.trader.agent.repository.StockPricingExecution;
@@ -10,9 +11,9 @@ import io.cloudNativeData.trading.*;
 import io.cloudNativeData.trading.news.StockNewsAnalysis;
 import io.cloudNativeData.trading.pricing.StockPriceDto;
 import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
+import io.cloudNativeData.trading.watch.StockPriceMovingAverageWatchList;
 import nyla.solutions.core.patterns.creational.generator.JavaBeanGeneratorCreator;
 import nyla.solutions.core.patterns.integration.Publisher;
-import org.apache.catalina.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.converter.Converter;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -59,6 +62,9 @@ class ResearchTraderServiceTest {
     private  Publisher<TradeRecommendation> tradeRecommendationPublisher ;
 
 
+    @Mock
+    private  StockListenerConfig stockListenerConfig;
+
     private final StockPriceDto dto = JavaBeanGeneratorCreator.of(StockPriceDto.class).create();
     private final StockDailyPrice stockDailyPrice = JavaBeanGeneratorCreator.of(StockDailyPrice.class).create();
     private final BigDecimal price = BigDecimal.TEN;
@@ -73,7 +79,8 @@ class ResearchTraderServiceTest {
                 tradeRecommendationRepository,stockPriceService,stockDailyPriceRepository,
                 dtoToPriceConverter,
                 tradeRecommendationPublisher,
-                stockPriceMovingAverageRepository);
+                stockPriceMovingAverageRepository,
+                stockListenerConfig);
     }
 
     @Test
@@ -296,5 +303,40 @@ class ResearchTraderServiceTest {
 
         // Assert
         verify(stockPriceMovingAverageRepository).save(any(StockPriceMovingAverage.class));
+    }
+
+    @Test
+    void shouldReturnTradeWatchCriteriaWithExpectedData() {
+        // Given
+        String expectedBuyQuery = "price < ma50";
+        String expectedSellQuery = "price > ma200";
+
+        Iterable<StockPriceMovingAverage> mockRecords = List.of(this.stockPriceMovingAverage);
+        when(stockPriceMovingAverageRepository.findAll()).thenReturn(mockRecords);
+        when(stockListenerConfig.getBuyerQuery()).thenReturn(expectedBuyQuery);
+        when(stockListenerConfig.getSellerQuery()).thenReturn(expectedSellQuery);
+
+        // When
+        StockPriceMovingAverageWatchList result = subject.getStockPriceMovingAverageWatchList();
+
+        // Then
+        assertNotNull(result, "The returned criteria should not be null");
+        assertEquals(mockRecords, result.stockPriceMovingAverages(), "Tickers should match the IDs from the repository");
+        assertEquals(expectedBuyQuery, result.buyQuery(), "Buy query should match the configuration");
+        assertEquals(expectedSellQuery, result.sellQuery(), "Sell query should match the configuration");
+
+        // Verify interactions (Optional but good practice)
+        verify(stockPriceMovingAverageRepository).findAllIds();
+        verify(stockListenerConfig).getBuyerQuery();
+        verify(stockListenerConfig).getSellerQuery();
+    }
+
+    @Test
+    void testSaveStockMovingAverage_Success() {
+        // Act: Call the method under test
+        subject.saveStockMovingAverage(this.stockPriceMovingAverage);
+
+        // Assert: Verify that the repository's save method was called exactly once with the correct object
+        verify(stockPriceMovingAverageRepository, times(1)).save(any(StockPriceMovingAverage.class));
     }
 }
