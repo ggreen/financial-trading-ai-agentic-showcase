@@ -22,6 +22,7 @@ public class StockNewsAnalyzerService {
     private final StockAnalysisInference inference;
     private final StockNewsAnalysisRepository stockNewsAnalysisRepository;
     private final StockSemanticRepository semanticRepository;
+    private final static String semanticModelName = "semantic";
 
     /**
      * The analyzed news
@@ -40,6 +41,9 @@ public class StockNewsAnalyzerService {
         if (prediction == null) {
             log.info("No semantic query found, performing inference");
             prediction = inference.infer(newsParameters);
+        }
+        else {
+            prediction.setModelName(semanticModelName);
         }
 
         log.info("prediction = {}", prediction);
@@ -69,7 +73,6 @@ public class StockNewsAnalyzerService {
     }
 
     public void saveNewsContext(NewsContext newsContext) {
-
         semanticRepository.saveNewsContext(newsContext);
     }
 }

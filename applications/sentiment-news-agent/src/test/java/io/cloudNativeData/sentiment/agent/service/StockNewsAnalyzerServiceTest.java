@@ -51,6 +51,9 @@ class StockNewsAnalyzerServiceTest {
     @Mock
     private StockPrediction mockPrediction;
 
+    @Mock
+    private NewsContext mockNewsContext;
+
     @BeforeEach
     void setUp() {
         subject = new StockNewsAnalyzerService(inference,stockNewsAnalysisRepository, semanticRepository);
@@ -158,14 +161,8 @@ class StockNewsAnalyzerServiceTest {
     @DisplayName("Should successfully save raw news to VectorStore and context to NewsContextRepository")
     void testSaveNewsContext_SavesToVectorStoreAndRepository() {
         // Arrange
-        var sampleRawNews = "Apple launches revolutionary AI features in 2026.";
-        var mockNewsContext = NewsContext.builder()
-                .id(sampleRawNews)
-                .build();
-
         // Act
         subject.saveNewsContext(mockNewsContext);
-
 
         verify(this.semanticRepository).saveNewsContext(any(NewsContext.class));
 
