@@ -321,12 +321,13 @@
                      class="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-slate-800/40 cursor-pointer transition duration-150 group">
 
                     <div class="col-span-2">
-                    <span class="bg-tanzuTeal/10 text-tanzuTeal group-hover:bg-tanzuTeal group-hover:text-tanzuBg px-2.5 py-1 rounded text-sm font-bold tracking-wider mono border border-tanzuTeal/20 transition-colors duration-150"
+                    <span class="bg-blue-500/10 text-blue-400 group-hover:bg-blue-600 group-hover:text-white px-2.5 py-1 rounded text-sm font-bold tracking-wider mono border border-blue-500/20 transition-colors duration-150"
                           x-text="stock.ticker"></span>
                     </div>
 
                     <div class="col-span-3">
-                    <span class="bg-blue-950/40 text-sky-400 border border-sky-500/30 px-2.5 py-1 rounded text-xs font-bold tracking-wider mono uppercase"
+                    <span class="px-2.5 py-1 rounded text-xs font-bold tracking-wider mono uppercase border"
+                          :class="stock.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950/40 text-tanzuBullish border-emerald-500/30' : (stock.stockPrediction.marketSentiment === 'BEARISH' ? 'bg-red-950/40 text-tanzuBearish border-red-500/30' : 'bg-slate-800/40 text-slate-400 border-slate-700/30')"
                           x-text="stock.stockPrediction.marketSentiment"></span>
                     </div>
 
@@ -432,7 +433,7 @@
                             <div class="p-5 flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-center space-x-3 mb-3">
-                                        <span class="bg-tanzuTeal/10 text-tanzuTeal px-2.5 py-0.5 rounded text-xs font-bold tracking-wider mono border border-tanzuTeal/20" x-text="postResult.ticker"></span>
+                                        <span class="bg-blue-500/10 text-blue-400 px-2.5 py-0.5 rounded text-xs font-bold tracking-wider mono border border-blue-500/20" x-text="postResult.ticker"></span>
                                         <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500 mono">Raw Stream Ingest</span>
                                     </div>
                                     <div class="text-xs text-slate-400 line-clamp-6 whitespace-pre-line bg-tanzuBg/40 p-3 rounded border border-tanzuBorder/40 font-light italic" x-text="`“${postResult.rawNews}”`"></div>
@@ -456,8 +457,8 @@
                                     <div class="grid grid-cols-3 gap-2">
                                         <div class="bg-tanzuBg/60 border border-tanzuBorder p-2.5 rounded">
                                             <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1">Sentiment Polarity</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide mono"
-                                                  :class="postResult.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950 text-tanzuBullish border border-emerald-500/30' : 'bg-red-950 text-tanzuBearish border border-red-500/30'"
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide mono uppercase"
+                                                  :class="postResult.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950 text-tanzuBullish border border-emerald-500/30' : (postResult.stockPrediction.marketSentiment === 'BEARISH' ? 'bg-red-950 text-tanzuBearish border border-red-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700/30')"
                                                   x-text="postResult.stockPrediction.marketSentiment"></span>
                                         </div>
                                         <div class="bg-tanzuBg/60 border border-tanzuBorder p-2.5 rounded">
@@ -617,7 +618,7 @@
                     <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold mono">Pipeline Node Analysis</span>
                     <span class="text-slate-600">/</span>
                     <template x-if="selectedStock">
-                        <span class="bg-tanzuTeal/10 text-tanzuTeal px-3 py-0.5 rounded text-sm font-bold tracking-wider mono border border-tanzuTeal/20" x-text="selectedStock.ticker"></span>
+                        <span class="bg-blue-500/10 text-blue-400 px-3 py-0.5 rounded text-sm font-bold tracking-wider mono border border-blue-500/20" x-text="selectedStock.ticker"></span>
                     </template>
                 </div>
                 <button @click="closeDetails()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-tanzuBorder/50 transition">
@@ -660,8 +661,8 @@
                             <div class="grid grid-cols-2 gap-4 mb-4">
                                 <div class="bg-tanzuBg/60 border border-tanzuBorder p-4 rounded-lg">
                                     <span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Market Sentiment</span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold tracking-wide mono"
-                                          :class="selectedStock.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950 text-tanzuBullish border border-emerald-500/30' : 'bg-red-950 text-tanzuBearish border border-red-500/30'"
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold tracking-wide mono uppercase"
+                                          :class="selectedStock.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950 text-tanzuBullish border border-emerald-500/30' : (selectedStock.stockPrediction.marketSentiment === 'BEARISH' ? 'bg-red-950 text-tanzuBearish border border-red-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700/30')"
                                           x-text="selectedStock.stockPrediction.marketSentiment">
                                         </span>
                                 </div>
