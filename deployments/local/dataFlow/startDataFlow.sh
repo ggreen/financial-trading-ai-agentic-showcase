@@ -10,7 +10,7 @@ export SPRING_APPLICATION_JSON="{\"spring.cloud.stream.binders.rabbitBinder.envi
 mkdir -p runtime/dataflow/logs
 
 
-
+export SPRING_CLOUD_DEPLOYER_LOCAL_envVarsToInherit="LC_.*"
 
 java -jar  $DATAFLOW_HOME/scdf-pro-skipper-1.6.13.jar > runtime/dataflow/logs/skipper.log&
 

@@ -4,7 +4,6 @@ import io.cloudNativeData.research.trader.agent.service.ResearchTraderService;
 import io.cloudNativeData.trading.pricing.StockPriceMovingAverage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.geode.cache.Operation;
 import org.apache.geode.cache.query.CqEvent;
 import org.apache.geode.cache.util.CqListenerAdapter;
 import org.springframework.data.gemfire.listener.ContinuousQueryListener;
@@ -35,7 +34,7 @@ public class BuyStockListener extends CqListenerAdapter implements ContinuousQue
             return;
         }
 
-        if (cqEvent != null && cqEvent.getKey() != null) {
+        if (cqEvent.getKey() != null) {
             var ticker = cqEvent.getKey().toString();
 
             log.info("BUY STOCK listener invoked.The stock event received: {}", ticker);

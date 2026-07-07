@@ -1,6 +1,17 @@
 
 
+- http://demo.cloudNativeData.io:7077
+- http://demo.cloudNativeData.io:15672
+- http://demo.cloudNativeData.io:9001
+- http://demo.cloudNativeData.io:9002
+- http://demo.cloudNativeData.io:9003
+
 Task
+
+
+```properties
+name=stock-daily-price-batch
+```
 
 ```properties
 stock-daily-price-batch --input.file.path="file:///Users/Projects/solutions/AI-ML/dev/financial-trading-ai-agentic-showcase/applications/batch/stock-daily-price-batch/src/main/resources/csv/acme_stock_prices.csv"
@@ -14,8 +25,9 @@ ai-sql=portfolio-sql-analytics-mcp-server --server.port=9077 || stock-price --se
 
 
 
-TICKER=ACME-CAR
+## Ingest News
 
+TICKER=ACME-CAR
 NEWS=Recently we have heard news of stock manipulation by this company.
 
 
