@@ -57,6 +57,8 @@
           formNewsHtml: '',
           formSubmitting: false,
           postResult: null,
+          pipelineStartTime: null,
+          pipelineExecutionTime: 0,
 
           /* Form Input Controls - Append Domain Context */
           isAddContextOpen: false,
@@ -112,6 +114,7 @@
               this.formNewsHtml = '';
               if (this.$refs.wysiwygEditor) this.$refs.wysiwygEditor.innerHTML = '';
               this.postResult = null;
+              this.pipelineExecutionTime = 0;
               this.isAddNewsOpen = true;
           },
 
@@ -146,6 +149,7 @@
               }
 
               this.formSubmitting = true;
+              this.pipelineStartTime = performance.now();
               try {
                   const response = await fetch('/stocks', {
                       method: 'POST',
@@ -161,6 +165,7 @@
 
                   if (!response.ok) throw new Error('Ingestion pipeline rejected payload.');
                   this.postResult = await response.json();
+                  this.pipelineExecutionTime = Math.round(performance.now() - this.pipelineStartTime);
               } catch (err) {
                   alert('Error processing document ingestion workflow. See console records.');
                   console.error(err);
@@ -448,16 +453,20 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-tanzuBg/60 border border-tanzuBorder p-3 rounded">
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div class="bg-tanzuBg/60 border border-tanzuBorder p-2.5 rounded">
                                             <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1">Sentiment Polarity</span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wide mono"
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide mono"
                                                   :class="postResult.stockPrediction.marketSentiment === 'BULLISH' ? 'bg-emerald-950 text-tanzuBullish border border-emerald-500/30' : 'bg-red-950 text-tanzuBearish border border-red-500/30'"
                                                   x-text="postResult.stockPrediction.marketSentiment"></span>
                                         </div>
-                                        <div class="bg-tanzuBg/60 border border-tanzuBorder p-3 rounded">
+                                        <div class="bg-tanzuBg/60 border border-tanzuBorder p-2.5 rounded">
                                             <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1">Confidence Vector</span>
-                                            <span class="text-sm font-bold text-white mono" x-text="`${(postResult.stockPrediction.sentimentConfidence * 100).toFixed(0)}%`"></span>
+                                            <span class="text-xs font-bold text-white mono" x-text="`${(postResult.stockPrediction.sentimentConfidence * 100).toFixed(0)}%`"></span>
+                                        </div>
+                                        <div class="bg-tanzuBg/60 border border-tanzuBorder p-2.5 rounded">
+                                            <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1">Execution Time</span>
+                                            <span class="text-xs font-bold text-sky-400 mono" x-text="`${pipelineExecutionTime}ms`"></span>
                                         </div>
                                     </div>
 

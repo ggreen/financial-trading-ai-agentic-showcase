@@ -27,8 +27,11 @@ ai-sql=portfolio-sql-analytics-mcp-server --server.port=9077 || stock-price --se
 
 ## Ingest News
 
+```properties
 TICKER=ACME-CAR
 NEWS=Recently we have heard news of stock manipulation by this company.
+
+```
 
 
 Add Context
