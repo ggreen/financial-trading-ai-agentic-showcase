@@ -20,7 +20,7 @@ public class RabbitConf {
 //    @Value("${spring.cloud.stream.bindings.input.destination}")
 //    private String outboundNewsStream;
 //
-    @Value("${spring.cloud.stream.bindings.output.destination:amq.topic}")
+    @Value("${spring.cloud.stream.bindings.stockNewsAnalyzerProcessor-out-0.destination}")
     private String stockNewsAnalysisExchange;
 
 
