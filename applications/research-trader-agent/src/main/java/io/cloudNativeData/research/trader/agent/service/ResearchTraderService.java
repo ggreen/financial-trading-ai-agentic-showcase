@@ -19,6 +19,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ import java.math.BigDecimal;
 public class ResearchTraderService {
 
     private final TradePredictionInference inference;
-    private final StockPricingExecution repository;
+    private final StockPricingExecution stockPricingExecution;
     private final TradeRecommendationRepository tradeRecommendationRepository;
     private final StockPriceService stockPriceService;
     private final StockDailyPriceRepository stockDailyPriceRepository;
@@ -40,8 +41,14 @@ public class ResearchTraderService {
     public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
 
 
-        var movingAverage200 = repository
+        var movingAverage200 = stockPricingExecution
                 .calculateMovingAverage200(stockNewsAnalysis.getId());
+
+        if(movingAverage200 == null)
+            movingAverage200 = BigDecimal.ZERO;
+
+        //round decimals
+        movingAverage200 = movingAverage200.setScale(2, RoundingMode.CEILING);
 
         var stockPrice = stockPriceService.getCurrentStockPrice(stockNewsAnalysis.getTicker());
 

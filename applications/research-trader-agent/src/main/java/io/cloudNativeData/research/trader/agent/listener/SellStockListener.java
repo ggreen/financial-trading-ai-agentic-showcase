@@ -40,7 +40,7 @@ public class SellStockListener extends CqListenerAdapter implements ContinuousQu
             log.info("SELL STOCK listener invoked. Sell stock event received: {}", ticker);
 
             // Invoke the specific service method
-//            researchTraderService.recommendSell((StockPriceMovingAverage) cqEvent.getNewValue());
+            researchTraderService.recommendSell((StockPriceMovingAverage) cqEvent.getNewValue());
         }
     }
 }

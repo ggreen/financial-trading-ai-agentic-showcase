@@ -464,6 +464,18 @@
                                             </div>
                                         </div>
 
+                                        <div>
+                                            <label class="block text-[11px] text-tanzu-gray font-medium mb-1.5 font-sans">Market Sentiment (marketSentiment)</label>
+                                            <div class="relative">
+                                                <select v-model="maNode.marketSentiment" class="w-full bg-tanzu-bg border border-tanzu-border rounded-md pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-tanzu-blue font-mono appearance-none">
+                                                    <option value="BULLISH">BULLISH</option>
+                                                    <option value="BEARISH">BEARISH</option>
+                                                    <option value="NEUTRAL">NEUTRAL</option>
+                                                </select>
+                                                <i class="fa-solid fa-chart-bar absolute left-2.5 top-2.5 text-[10px] text-tanzu-gray"></i>
+                                            </div>
+                                        </div>
+
                                     </div>
 
                                     <div class="flex justify-end pt-2 border-t border-tanzu-border/40">
@@ -547,7 +559,8 @@
                             "price": 128.25,
                             "ticker": "ACME_INS",
                             "updated": 1783296642168,
-                            "volume": 117939
+                            "volume": 117939,
+                            "marketSentiment": "BULLISH"
                         }
                     }
                 ],
@@ -644,6 +657,7 @@
                 const payload = {
                     id: maNode.id,
                     movingAverage200: Number(maNode.movingAverage200),
+                    marketSentiment: maNode.marketSentiment || "NEUTRAL",
                     stockPrice: {
                         ticker: maNode.stockPrice?.ticker || maNode.id,
                         name: maNode.stockPrice?.name || maNode.id,

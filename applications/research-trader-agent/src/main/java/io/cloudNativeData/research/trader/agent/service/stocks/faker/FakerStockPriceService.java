@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import nyla.solutions.core.util.Digits;
 import org.springframework.stereotype.Service;
 
+import java.math.RoundingMode;
 import java.util.Currency;
 import java.util.Locale;
 
@@ -33,7 +34,8 @@ public class FakerStockPriceService implements GetStockFallbackService {
     public StockPriceDto getCurrentStockPrice(String ticker) {
 
         log.info("FakerStockPriceService.getCurrentStockPrice(ticker={})", ticker);
-        var price = stockPricingExecution.calculateMovingAverage200(ticker);
+        var price = stockPricingExecution.calculateMovingAverage200(ticker)
+                .setScale(2, RoundingMode.CEILING);
 
         log.info("ticker={}, price={}", ticker,price);
 
