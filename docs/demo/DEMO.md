@@ -38,23 +38,23 @@ Add Context
 
 ```properties
 context=stock manipulation is BEARISH
-sumamry=Stock Manipulation: Corporation Leadership Trust Concerns
+summary=Stock Manipulation: Corporation Leadership Trust Concerns
 ```
 
 ```properties
 name=ACME-HOSPITAL
-NEWS=Doctors are making up phony results that is a trust concern 
+NEWS=Doctors are making up phony results that are trust concerns.
 ```
 
 ```properties
 name=ACME-TAX
-NEWS=Tax preparer are providing fake and false results
+NEWS=Tax preparers are providing fake and or often false results
 ```
 
 Add Context 
 
 ```properties
-NEWS=fake false results
+NEWS=ACME
 summary=Fraud Manipulation: Corporation Trust Concerns
 ```
 

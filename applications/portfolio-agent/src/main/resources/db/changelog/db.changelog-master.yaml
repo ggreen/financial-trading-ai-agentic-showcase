@@ -19,7 +19,7 @@ databaseChangeLog:
               CREATE TABLE IF NOT EXISTS portfolio.portfolio_positions (
                   id BIGINT PRIMARY KEY,
                   asset_type VARCHAR(10) NOT NULL,
-                  ticker VARCHAR(10) NOT NULL,
+                  ticker VARCHAR(30) NOT NULL,
                   quantity NUMERIC(18,4) NOT NULL,
                   current_price NUMERIC(18,4) NOT NULL
               );
@@ -74,4 +74,27 @@ databaseChangeLog:
               VALUES (1, 'CASH', 'USD', 50000.0000, 1.0000);
 
               INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price) 
-              VALUES (2, 'STOCK', 'AAPL', 250.0000, 180.0000);
+              VALUES (2, 'STOCK', 'ACME-TECH', 250.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (3, 'STOCK', 'ACME_WELL', 150.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (4, 'STOCK', 'ACME_SPORT', 650.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (5, 'STOCK', 'ACME_INS', 150.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (6, 'STOCK', 'ACME_PHARMA', 350.0000, 180.0000);
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (7, 'STOCK', 'ACME_TELCO', 50.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (8, 'STOCK', 'ACME-CAR', 30.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (9, 'STOCK', 'ACME-HOSPITAL', 450.0000, 180.0000);
+              
+              INSERT INTO portfolio.portfolio_positions (id, asset_type, ticker, quantity, current_price)
+              VALUES (10, 'STOCK', 'ACME-TAX', 550.0000, 180.0000);
