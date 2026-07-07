@@ -1,5 +1,6 @@
 package io.cloudNativeData.research.trader.agent.functions.gemfire;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.geode.cache.execute.FunctionException;
 import org.apache.geode.cache.execute.ResultCollector;
 import org.apache.geode.distributed.DistributedMember;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Slf4j
 public class CalculateMovingAverage200ResultsCollector implements ResultCollector<Object, BigDecimal> {
 
     // Store the incoming results from executing nodes
@@ -22,8 +24,13 @@ public class CalculateMovingAverage200ResultsCollector implements ResultCollecto
      */
     @Override
     public synchronized void addResult(DistributedMember memberID, Object resultOfSingleExecution) {
-        if (resultOfSingleExecution instanceof BigDecimal) {
-            this.nodeResults.add((BigDecimal) resultOfSingleExecution);
+        if (resultOfSingleExecution instanceof BigDecimal movingAverage) {
+
+            log.info("MovingAverage 200 results {} from memberID: {} ", movingAverage,memberID);
+
+            if(!BigDecimal.ZERO.equals(movingAverage))
+                this.nodeResults.add(movingAverage);
+
         } else if (resultOfSingleExecution instanceof Throwable) {
             throw new FunctionException((Throwable) resultOfSingleExecution);
         }

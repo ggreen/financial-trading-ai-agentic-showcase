@@ -35,7 +35,7 @@ public class StockPriceService {
     }
 
 
-    @Cacheable("StockPrice")
+//    @Cacheable("StockPrice")
     public StockPriceDto getCurrentStockPrice(String ticker) {
         // Wrap the external network call with the circuit breaker
         return this.readCircuitBreaker.run(

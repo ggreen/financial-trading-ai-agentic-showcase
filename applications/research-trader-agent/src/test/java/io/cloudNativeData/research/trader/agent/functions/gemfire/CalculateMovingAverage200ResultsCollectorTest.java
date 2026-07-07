@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -21,6 +22,10 @@ class CalculateMovingAverage200ResultsCollectorTest {
     private CalculateMovingAverage200ResultsCollector subject;
     @Mock
     private DistributedMember mockMember;
+
+    @Mock
+    private DistributedMember mockMember2;
+
 
     @BeforeEach
     void setUp() {
@@ -32,6 +37,17 @@ class CalculateMovingAverage200ResultsCollectorTest {
         BigDecimal result = subject.getResult();
 
         assertEquals(BigDecimal.ZERO, result);
+    }
+
+    @Test
+    void given_multi_results_when_one_server_is_zero_return_correct_average() {
+        var expected = BigDecimal.TEN;
+        subject.addResult(mockMember,BigDecimal.ZERO);
+        subject.addResult(mockMember,expected);
+
+        BigDecimal actual = subject.getResult();
+
+        assertThat(actual.doubleValue()).isEqualTo(expected.doubleValue());
     }
 
     @Test

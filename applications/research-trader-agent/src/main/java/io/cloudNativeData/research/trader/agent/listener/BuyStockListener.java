@@ -40,7 +40,7 @@ public class BuyStockListener extends CqListenerAdapter implements ContinuousQue
             log.info("BUY STOCK listener invoked.The stock event received: {}", ticker);
 
             // Invoke the specific service method
-            researchTraderService.recommendBuy((StockPriceMovingAverage) cqEvent.getNewValue());
+//            researchTraderService.recommendBuy((StockPriceMovingAverage) cqEvent.getNewValue());
         }
     }
 }

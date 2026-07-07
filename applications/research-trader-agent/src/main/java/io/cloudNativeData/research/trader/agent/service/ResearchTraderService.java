@@ -39,17 +39,17 @@ public class ResearchTraderService {
 
     public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
 
+
+        var movingAverage200 = repository
+                .calculateMovingAverage200(stockNewsAnalysis.getId());
+
         var stockPrice = stockPriceService.getCurrentStockPrice(stockNewsAnalysis.getTicker());
 
         if (stockPrice != null)
             stockDailyPriceRepository.save(dtoToPriceConverter.convert(stockPrice));
 
-        var movingAverage200 = repository
-                .calculateMovingAverage200(stockNewsAnalysis.getId());
-
 
         log.info("MovingAverage 200 stock price {}", movingAverage200);
-
 
         var summary200 = TradeParameters.builder()
                 .prediction(stockNewsAnalysis.getStockPrediction())
@@ -62,7 +62,8 @@ public class ResearchTraderService {
         var tradePrediction = inference.recommend(summary200);
         log.info("predication: {}", tradePrediction);
 
-        var price = recommendStockPrice(movingAverage200, stockNewsAnalysis.getStockPrediction().getMarketSentiment(),
+        var marketSentiment = stockNewsAnalysis.getStockPrediction().getMarketSentiment();
+        var price = recommendStockPrice(movingAverage200, marketSentiment,
                 stockNewsAnalysis.getStockPrediction().getSentimentConfidence().doubleValue());
 
 
@@ -87,6 +88,7 @@ public class ResearchTraderService {
                     .id(stockNewsAnalysis.getTicker())
                     .movingAverage200(movingAverage200.doubleValue())
                     .stockPrice(stockPrice)
+                    .marketSentiment(String.valueOf(marketSentiment))
                     .build();
 
             log.info("Watching stock by Saving stockPriceMovingAverage: {}", stockPriceMovingAverage);

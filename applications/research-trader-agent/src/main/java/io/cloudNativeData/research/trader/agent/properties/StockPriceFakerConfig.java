@@ -16,8 +16,6 @@ import java.util.Currency;
 public class StockPriceFakerConfig{
 
     private String exchange;
-    private double lowPrice;
-    private double highPrice;
     private int lowVolume;
     private int highVolume;
     private String currency;
