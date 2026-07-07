@@ -149,10 +149,16 @@
                     <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Total Active Rows</div>
                     <div class="text-2xl font-bold text-white font-mono">{{ recommendations.length }}</div>
                 </div>
+
                 <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
                     <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Dominant Sentiment</div>
-                    <div class="text-2xl font-bold text-tanzu-green font-mono">BULLISH</div>
+                    <div class="text-2xl font-bold font-mono" :class="{
+                        'text-tanzu-green': dominantSentiment === 'BULLISH',
+                        'text-red-400': dominantSentiment === 'BEARISH',
+                        'text-tanzu-gray': dominantSentiment === 'NEUTRAL'
+                    }">{{ dominantSentiment }}</div>
                 </div>
+
                 <div class="bg-tanzu-sidebar border border-tanzu-border p-4 rounded-lg">
                     <div class="text-[11px] font-bold text-tanzu-gray uppercase tracking-wider mb-1">Mean Target Confidence</div>
                     <div class="text-2xl font-bold text-white font-mono">95.0%</div>
@@ -734,6 +740,32 @@
                 return recommendations.value.filter(item => !item.tradePrediction?.adviceAction).length;
             });
 
+            // NEW: Computed Property to resolve dominant market sentiment
+            const dominantSentiment = computed(() => {
+                if (!recommendations.value || recommendations.value.length === 0) {
+                    return 'NEUTRAL';
+                }
+
+                let bullishCount = 0;
+                let bearishCount = 0;
+                let neutralCount = 0;
+
+                recommendations.value.forEach(item => {
+                    const sentiment = item.stockNewsAnalysis?.stockPrediction?.marketSentiment;
+                    if (sentiment === 'BULLISH') bullishCount++;
+                    else if (sentiment === 'BEARISH') bearishCount++;
+                    else if (sentiment === 'NEUTRAL') neutralCount++;
+                });
+
+                if (bullishCount > bearishCount && bullishCount > neutralCount) {
+                    return 'BULLISH';
+                } else if (bearishCount > bullishCount && bearishCount > neutralCount) {
+                    return 'BEARISH';
+                } else {
+                    return 'NEUTRAL';
+                }
+            });
+
             onMounted(() => {
                 fetchData();
                 resetPolling();
@@ -753,6 +785,7 @@
                 lastUpdated,
                 selectedItem,
                 nullActionCount,
+                dominantSentiment, // Return dominantSentiment variable to UI instance binder
                 showWatchList,
                 watchListLoading,
                 watchListData,

@@ -40,6 +40,7 @@ public class AiConfig {
             - Rely strictly on the provided text. Do not hallucinate or assume historical context not present in the prompt.
             - Do not include markdown code blocks (like ```json) or extra conversational text in your response.
             
+            ONLY RESPONSE WITH VALID JSON
             """;
     private static final String defaultSystemPrompt = """
             You are a Wall Street News Parsing Agent
@@ -83,7 +84,7 @@ public class AiConfig {
                                             "rawNews",news.rawNews(),
                                             "ticker",news.stockTicker()))
                     )
-                    .advisors(advisor)
+//                    .advisors(advisor) //removed still doing a semantic search
                     .call()
                     .entity(StockPrediction.class);
 
