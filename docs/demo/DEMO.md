@@ -6,8 +6,18 @@
 - http://demo.cloudNativeData.io:9002
 - http://demo.cloudNativeData.io:9003
 
+
+"ACME_WELL", "ACME_SPORT","ACME_INS","ACME_PHARMA","ACME_TELCO"
+
 Task
 
+
+
+IA
+
+- What are the highest 3  stocks by price
+- What is the lowest 2 stock by price
+- What is that top 3 stocker based on a BUY tradeProposal
 
 ```properties
 name=stock-daily-price-batch
@@ -43,7 +53,7 @@ summary=Stock Manipulation: Corporation Leadership Trust Concerns
 
 ```properties
 name=ACME-HOSPITAL
-NEWS=Doctors are making up phony results that are trust concerns.
+NEWS=Doctors are making up phony results that are stock trust concerns because of manipulate
 ```
 
 ```properties

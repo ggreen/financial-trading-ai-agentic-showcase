@@ -55,6 +55,7 @@ public class SqlExecutorMcpService {
     @RequestMapping("asks")
     public PortfolioQueryRequests executeTextAsSql(@RequestBody String textPrompt) {
 
+        log.info("Processing Prompt text: {}", textPrompt);
         // 1. Generate the SQL from the text prompt using an LLM
         String generatedSql = generateSqlFromText.convert(textPrompt);
 
@@ -67,7 +68,7 @@ public class SqlExecutorMcpService {
         // 2. Execute the SQL via JdbcTemplate and return the List of Maps
         try {
             var results = jdbcTemplate.queryForList(generatedSql);
-            log.info("Cleaned results: {}", results);
+            log.info("Returning JDBC database results: {}", results);
             resultsBuilder.results(results);
 
         } catch (Exception e) {

@@ -1,18 +1,14 @@
 # financial-trading-ai-agentic-showcase
 
+Tanzu Data Flow is used for AI data orchestration.
 
-Spring AI super for agenticAI
-Java
-Python for data scientist - Not being use for critical realtime solutions
-EASY TO DEVELOP
+Spring AI is the superpower for Agentic AI by Java applications.
 
-Valkey use for caging and advice for determine whether a sock is bullish or bearish
+Valkey use for caching and advice for determine whether a stock is bullish or bearish
 
-Gemfire dispute compute and ADVICE for trades
+GemFire used for distributed compute, advice for trades and continuous queries for stock price watching
 
-A green plum, which is based on post grass is used by the portfolio agent to provide analytics on potentially large amounts of data set  assets
-
-
+Greenplum, which is based on postgres, is used by the portfolio agent to provide analytics on potentially large amounts of data set  assets.
 
 
 
