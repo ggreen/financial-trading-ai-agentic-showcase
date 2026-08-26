@@ -1,10 +1,3 @@
-You may view ops man at:
-https://ndc.kuhn-labs.com
-
-user: kl_viewer
-password: mooQuo9eev3aixaroohaeng4iu5baig4
-
-
 cf create-service p.rabbitmq on-demand-plan rabbitmq -c '{"plugins": {"rabbitmq_stream": true}}'
 
 
