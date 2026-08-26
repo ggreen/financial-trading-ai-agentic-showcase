@@ -1,11 +1,12 @@
 # Getting started
 
 
-Start Podman (tested with 15 GB memory)
+Start Podman (tested with 20 GB memory)
 
 If running stop Podman (podman machine stop)
 ```shell
-podman machine set --memory 15360
+podman machine stop
+podman machine set --memory 32000
 podman machine start
 ```
 Start Ollama
@@ -22,6 +23,19 @@ podman exec -it ollama ollama pull llama3
 podman exec -it ollama ollama pull gpt-oss:20b
 podman exec -it ollama ollama pull mistral
 podman exec -it ollama ollama pull gemma
+```
+
+Or 
+
+Docker
+
+
+```shell
+docker exec -it ollama ollama pull mxbai-embed-large
+docker exec -it ollama ollama pull llama3
+docker exec -it ollama ollama pull gpt-oss:20b
+docker exec -it ollama ollama pull mistral
+docker exec -it ollama ollama pull gemma
 ```
 
 
@@ -93,19 +107,12 @@ Register using Data Flow UI
 
 
 
-
-
 "ACME_WELL", "ACME_SPORT","ACME_INS","ACME_PHARMA","ACME_TELCO"
 
 Task
 
 
 
-IA
-
-- What are the highest 3  stocks by price
-- What is the lowest 2 stock by price
-- What is that top 3 stocker based on a BUY tradeProposal
 
 
 ## run demo
@@ -167,15 +174,6 @@ Deploy streams
 ![img_3.png](img_3.png)
 
 
-Open
-
-
-- http://demo.cloudNativeData.io:7077
-- http://demo.cloudNativeData.io:15672
-- http://demo.cloudNativeData.io:9001
-- http://demo.cloudNativeData.io:9002
-- http://demo.cloudNativeData.io:9003
-
 
 ## Ingest News
 
@@ -215,6 +213,43 @@ deployer.research-trader-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.defau
 deployer.portfolio-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.default.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.input.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.output.consumer.containerType=stream
 deployer.sentiment-news-agent.local.javaOpts=-Dspring.cloud.stream.rabbit.default.consumer.containerType=stream -Dspring.cloud.stream.rabbit.bindings.input.consumer.containerType=stream  -Dspring.cloud.stream.rabbit.bindings.output.producer.producerType=STREAM_SYNC
 
+version.sentiment-news-agent=0.0.1-SNAPSHOT
+deployer.sentiment-news-agent.bootVersion=3
+version.portfolio-agent=0.0.1-SNAPSHOT
+deployer.portfolio-agent.bootVersion=3
+version.research-trader-agent=0.0.1-SNAPSHOT
+deployer.research-trader-agent.bootVersion=3
+app.sentiment-news-agent.server.port=9001
+app.research-trader-agent.server.port=9002
+app.portfolio-agent.server.port=9003
 
 
 ```
+
+
+Open
+
+GemFire Management Console
+- http://demo.cloudNativeData.io:7077
+
+Open RabbitMQ
+
+- http://demo.cloudNativeData.io:15672
+
+Sentiment News AI App
+
+- http://demo.cloudNativeData.io:9001
+
+Trader Agent 
+- http://demo.cloudNativeData.io:9002
+
+Portfolio Agent
+
+- http://demo.cloudNativeData.io:9003
+
+
+IA
+
+- What are the highest 3  stocks by price
+- What is the lowest 2 stock by price
+- What is that top 3 stocker based on a BUY tradeProposal
