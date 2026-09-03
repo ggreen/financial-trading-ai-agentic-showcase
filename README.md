@@ -65,7 +65,7 @@ git clone [https://github.com/ggreen/financial-trading-ai-agentic-showcase.git](
 cd financial-trading-ai-agentic-showcase
 
 # Build the project using Maven
-./mvnw clean install
+./gradlew clean build
 ```
 
 📺 Related Resources
