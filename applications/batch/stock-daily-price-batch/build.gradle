@@ -2,10 +2,12 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.6'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group = 'io.cloudNativeData'
-version = '0.0.1-SNAPSHOT'
+group = 'com.github.ggreen'
+version = '0.0.1'
 
 java {
     toolchain {
@@ -89,4 +91,69 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'com.github.ggreen'
+                groupId = group
+                artifactId = 'stock-daily-price-batch'
+                description = 'stock-daily-price-batch'
+                from components.java
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+                url = 'https://github.com/nyla-solutions/nyla'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'ggreen'
+                        name = 'Gregory Green'
+                        email = 'ggreen@g-solutions.net'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/ggreen/financial-trading-ai-agentic-showcase.git'
+                    developerConnection = 'scm:git:https://github.com/ggreen/financial-trading-ai-agentic-showcase.git'
+                    url = 'https://github.com/ggreen/financial-trading-ai-agentic-showcase.git'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+            def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+signing {
+//	def signingKeyId = System.getenv("GPG_PRIVATE_KEY_ID")
+    def signingPassword = System.getenv("GPG_PASSPHRASE")
+    def signingKey = System.getenv("GPG_PRIVATE_KEY")?.replace("\\n", "\n")
+
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }
