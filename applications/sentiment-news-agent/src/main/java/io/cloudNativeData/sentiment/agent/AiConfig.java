@@ -2,12 +2,10 @@ package io.cloudNativeData.sentiment.agent;
 
 import io.cloudNativeData.sentiment.agent.ai.StockAnalysisInference;
 import io.cloudNativeData.trading.StockPrediction;
-import io.cloudNativeData.trading.news.NewsParameters;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
@@ -19,7 +17,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 @Configuration
 @Slf4j

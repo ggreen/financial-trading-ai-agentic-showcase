@@ -26,6 +26,7 @@ public class GenerateFakeNewsConfig {
     private final String prompt = """
             Generate news about company stock symbol: {stock} in the industry:{industry} that an stock analyst would analyze to 
             determine if you should buy or sell the stock.
+            Use less than 100 words.
             """;
 
     @Bean

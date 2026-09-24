@@ -17,6 +17,10 @@ java {
 	}
 }
 
+tasks.named('bootJar') {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 repositories {
 	mavenCentral()
 }
@@ -53,12 +57,21 @@ tasks.named('test') {
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
+			// Publish the bootJar as the main publication artifact
+			artifact tasks.named('bootJar')
+
+			// Publish sourcesJar as a secondary artifact
+			artifact tasks.named('sourcesJar')
+
+			// FIX: Explicitly add javadocJar to the publication
+			artifact tasks.named('javadocJar')
+
 			pom {
 				name = 'com.github.ggreen'
 				groupId = group
-				artifactId = 'stock-price-api'
-				description = 'stock-price-api'
-				from components.java
+				artifactId = 'research-trader-agent'
+				description = 'research-trader-agent'
+
 				versionMapping {
 					usage('java-api') {
 						fromResolutionOf('runtimeClasspath')
@@ -92,7 +105,6 @@ publishing {
 
 	repositories {
 		maven {
-			// change URLs to point to your repos, e.g. http://my.org/repo
 			def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
 			def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
@@ -101,7 +113,6 @@ publishing {
 }
 
 signing {
-//	def signingKeyId = System.getenv("GPG_PRIVATE_KEY_ID")
 	def signingPassword = System.getenv("GPG_PASSPHRASE")
 	def signingKey = System.getenv("GPG_PRIVATE_KEY")?.replace("\\n", "\n")
 
@@ -113,4 +124,26 @@ javadoc {
 	if(JavaVersion.current().isJava9Compatible()) {
 		options.addBooleanOption('html5', true)
 	}
+}
+
+// Task to zip up the published repository folder
+tasks.register('createRepoZip', Zip) {
+	dependsOn tasks.named('publishMavenJavaPublicationToMavenRepository')
+
+	archiveBaseName = 'stock-price-api'
+	archiveClassifier = 'repo'
+	archiveVersion = project.version.toString()
+	destinationDirectory = layout.buildDirectory.dir('distributions')
+
+	// Include files published in the local build repository
+	def repoDir = version.endsWith('SNAPSHOT') ?
+			layout.buildDirectory.dir('repos/snapshots') :
+			layout.buildDirectory.dir('repos/releases')
+
+	from repoDir
+}
+
+// Ensures running 'publish' also triggers zip archive generation
+tasks.named('publish') {
+	finalizedBy tasks.named('createRepoZip')
 }

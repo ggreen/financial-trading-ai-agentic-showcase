@@ -10,8 +10,7 @@ public class SentimentAgentApp {
 
     public static void main(String[] args) {
 
-        log.info("App start: properties:{},  args: {}\n env: {}",System.getProperties(),
-                args,System.getenv());
+//        log.info("App start: properties:{},  args: {}\n env: {}",System.getProperties(), args,System.getenv());
 
         SpringApplication.run(SentimentAgentApp.class, args);
     }
