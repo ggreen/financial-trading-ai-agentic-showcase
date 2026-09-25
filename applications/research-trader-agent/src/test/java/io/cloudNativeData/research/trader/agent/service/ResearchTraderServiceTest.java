@@ -124,6 +124,35 @@ class ResearchTraderServiceTest {
 
     }
 
+    @Test
+    void given_neutral_sentiment_when_recommend_then_return_NA_for_trade() {
+
+        when(this.stockPriceService.getCurrentStockPrice(anyString())).thenReturn(dto);
+        when(this.dtoToPriceConverter.convert(any())).thenReturn(this.stockDailyPrice);
+        when(this.stockPricingExecution.calculateMovingAverage200(any())).thenReturn(movingAvg200);
+
+        BigDecimal price = BigDecimal.valueOf(10.2);
+        TradePrediction prediction = TradePrediction.builder()
+                .adviceAction(TradeAction.BUY)
+                .tradeConfidence(0.99)
+                .build();
+
+        when(inference.recommend(any())).thenReturn(prediction);
+
+        StockNewsAnalysis neutral = StockNewsAnalysis.builder()
+                .rawNews("Junit is awesome")
+                .ticker("junit")
+                .stockPrediction(StockPrediction.builder()
+                        .marketSentiment(MarketSentiment.NEUTRAL)
+                        .sentimentConfidence(BigDecimal.valueOf(99.99))
+                        .modelName("model")
+                        .newsSummary("newsSummary")
+                        .build())
+                .build();
+        var actual = subject.recommend(neutral);
+
+        assertThat(actual.getTradePrediction().getAdviceAction()).isEqualTo(TradeAction.NA);
+    }
 
     @Test
     void given_nullStockPrice_when_recommend_then_doNotSaveDailyPrice() {
@@ -274,7 +303,7 @@ class ResearchTraderServiceTest {
 
     @Test
     @DisplayName("Should add to stock price moving average when no TradeAction")
-    void recommend_WhenTradeActionIsNull_ShouldReturnNull() {
+    void recommend_WhenTradeActionIsNull_ShouldReturn() {
         // Arrange
         String id = "analysis-123";
         String ticker = "AAPL";

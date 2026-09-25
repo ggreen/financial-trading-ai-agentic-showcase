@@ -38,8 +38,12 @@ public class ResearchTraderService {
     private final static String movingAverageRuleModelName = "rule-movingAverage";
 
 
+    /**
+     * After the trade recommendation
+     * @param stockNewsAnalysis the stock informaiton
+     * @return the trade recommendation
+     */
     public TradeRecommendation recommend(StockNewsAnalysis stockNewsAnalysis) {
-
 
         var movingAverage200 = stockPricingExecution
                 .calculateMovingAverage200(stockNewsAnalysis.getId());
@@ -66,17 +70,20 @@ public class ResearchTraderService {
         log.info("Performing inference to determine trade recommendation, for stockNewsAnalysis Id: {}",
                 stockNewsAnalysis.getId());
 
-        var tradePrediction = inference.recommend(summary200);
+        var tradePrediction = makePrediction(summary200);
         log.info("predication: {}", tradePrediction);
+
+
 
         var marketSentiment = stockNewsAnalysis.getStockPrediction().getMarketSentiment();
         var price = recommendStockPrice(movingAverage200, marketSentiment,
                 stockNewsAnalysis.getStockPrediction().getSentimentConfidence().doubleValue());
 
-
         log.info("price]: {}", price);
 
-        var tradeRecommendation = TradeRecommendation
+
+
+            var tradeRecommendation = TradeRecommendation
                 .builder()
                 .id(stockNewsAnalysis.getId())
                 .tradePrediction(tradePrediction)
@@ -101,12 +108,21 @@ public class ResearchTraderService {
             log.info("Watching stock by Saving stockPriceMovingAverage: {}", stockPriceMovingAverage);
 
             this.stockPriceMovingAverageRepository.save(stockPriceMovingAverage);
-
-            log.info("Return null since cannot recommend stock news analysis id: {} at this time.",stockNewsAnalysis.getId());
-            return null;
         }
 
         return tradeRecommendation;
+    }
+
+    private TradePrediction makePrediction(TradeParameters summary200) {
+
+        log.info("Checking prediction");
+        var sentiment = summary200.getPrediction().getMarketSentiment();
+        if (MarketSentiment.NEUTRAL.equals(sentiment)) {
+            return TradePrediction.builder()
+                    .adviceAction(TradeAction.NA).build();
+        }
+
+        return inference.recommend(summary200);
     }
 
 
