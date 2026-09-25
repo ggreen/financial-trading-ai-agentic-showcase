@@ -193,7 +193,7 @@ summary=Stock Manipulation: Corporation Leadership Trust Concerns
 
 ```properties
 name=ACME-HOSPITAL
-NEWS=Doctors are making up phony results that are stock trust concerns because of manipulate
+NEWS=Doctors are making up phony results that are stock trust concerns because of manipulate. Stock Manipulation: Corporation Leadership Trust Concerns
 ```
 
 ```properties
