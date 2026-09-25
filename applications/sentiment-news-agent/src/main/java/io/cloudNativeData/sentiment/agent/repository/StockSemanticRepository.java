@@ -22,7 +22,7 @@ public class StockSemanticRepository {
     private final NewsContextRepository newsContextRepository;
 
     public StockSemanticRepository(VectorStore vectorStore,
-                                   @Value("${app.stock.news.analysisa.semantic.repository.similarityThreshold:0.8}")double similarityThreshold,
+                                   @Value("${app.stock.news.analysis.semantic.repository.similarityThreshold:0.8}")double similarityThreshold,
                                     NewsContextRepository newsContextRepository) {
         this.vectorStore = vectorStore;
         this.similarityThreshold = similarityThreshold;
@@ -32,6 +32,7 @@ public class StockSemanticRepository {
 
     public Optional<StockPrediction> findStockPredictionByRawNews(String rawNews) {
 
+        log.info("Find stock prediction with similarityThreshold: {}, of news{}", similarityThreshold, rawNews);
         // 1. Build the similarity search request
         var searchRequest  = SearchRequest.builder()
                 .query(rawNews)

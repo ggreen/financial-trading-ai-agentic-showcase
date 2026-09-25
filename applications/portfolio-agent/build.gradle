@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.github.ggreen'
-version = '0.0.1'
+version = '0.0.2'
 
 java {
 	toolchain {
@@ -46,8 +46,6 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
-//	implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
-//	implementation 'org.springframework.ai:spring-ai-starter-mcp-client-webflux'
 
 	implementation 'org.springframework.cloud:spring-cloud-function-web'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
